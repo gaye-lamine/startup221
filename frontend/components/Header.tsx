@@ -1,15 +1,26 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 
 export default function Header() {
   const router = useRouter();
+  const pathname = usePathname();
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+
+  // Simulated logged-in state using localStorage for cross-page persistence
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  useEffect(() => {
+    const session = localStorage.getItem("startup_session");
+    if (session === "true") {
+      setIsLoggedIn(true);
+    }
+  }, []);
 
   const handleLoginSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -17,13 +28,22 @@ export default function Header() {
     setTimeout(() => {
       setLoading(false);
       setShowLoginModal(false);
+      setIsLoggedIn(true);
+      localStorage.setItem("startup_session", "true");
       router.push("/dashboard");
     }, 800);
+  };
+
+  const handleLogout = () => {
+    setIsLoggedIn(false);
+    localStorage.removeItem("startup_session");
+    router.push("/");
   };
 
   return (
     <header className="border-b border-slate-100 bg-white sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+        
         {/* Left Side */}
         <div className="flex items-center gap-10">
           <Link href="/" className="text-2xl font-bold text-brand-active tracking-tight flex items-center gap-1">
@@ -33,45 +53,67 @@ export default function Header() {
           <nav className="hidden md:flex items-center gap-8 h-16">
             <Link
               href="/"
-              className="text-sm font-medium text-slate-500 hover:text-slate-900 transition-colors h-full flex items-center px-1"
+              className={`text-sm font-semibold h-full flex items-center px-1 border-b-2 transition-all ${
+                pathname === "/" ? "text-brand-active border-brand-active" : "text-slate-500 hover:text-slate-900 border-transparent"
+              }`}
             >
               Directory
             </Link>
             <button
               onClick={() => alert("À propos : Startup221 connecte l'écosystème tech sénégalais avec les investisseurs mondiaux.")}
-              className="text-sm font-medium text-slate-500 hover:text-slate-900 transition-colors h-full flex items-center px-1"
+              className="text-sm font-medium text-slate-500 hover:text-slate-900 transition-colors h-full flex items-center px-1 border-b-2 border-transparent"
             >
               About
             </button>
-            <Link
-              href="/for-investors"
-              className="text-sm font-medium text-slate-500 hover:text-slate-900 transition-colors h-full flex items-center px-1"
-            >
-              For Investors
-            </Link>
-            <Link
-              href="/dashboard"
-              className="text-sm font-medium text-slate-500 hover:text-slate-900 transition-colors h-full flex items-center px-1"
-            >
-              Dashboard
-            </Link>
+
+            {/* Conditionally render For Investors or Dashboard depending on login state */}
+            {!isLoggedIn ? (
+              <Link
+                href="/for-investors"
+                className={`text-sm font-semibold h-full flex items-center px-1 border-b-2 transition-all ${
+                  pathname === "/for-investors" ? "text-brand-active border-brand-active" : "text-slate-500 hover:text-slate-900 border-transparent"
+                }`}
+              >
+                For Investors
+              </Link>
+            ) : (
+              <Link
+                href="/dashboard"
+                className={`text-sm font-semibold h-full flex items-center px-1 border-b-2 transition-all ${
+                  pathname.startsWith("/dashboard") ? "text-brand-active border-brand-active" : "text-slate-500 hover:text-slate-900 border-transparent"
+                }`}
+              >
+                Dashboard
+              </Link>
+            )}
           </nav>
         </div>
 
         {/* Right Side */}
         <div className="flex items-center gap-6">
-          <button
-            onClick={() => setShowLoginModal(true)}
-            className="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors"
-          >
-            Login
-          </button>
-          <Link
-            href="/register"
-            className="text-sm font-medium bg-brand-active text-white px-5 py-2.5 rounded-lg hover:bg-brand-600 transition-colors shadow-sm"
-          >
-            Signup
-          </Link>
+          {!isLoggedIn ? (
+            <>
+              <button
+                onClick={() => setShowLoginModal(true)}
+                className="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors"
+              >
+                Login
+              </button>
+              <Link
+                href="/register"
+                className="text-sm font-medium bg-brand-active text-white px-5 py-2.5 rounded-lg hover:bg-brand-600 transition-colors shadow-sm"
+              >
+                Signup
+              </Link>
+            </>
+          ) : (
+            <button
+              onClick={handleLogout}
+              className="text-sm font-medium text-red-600 hover:text-red-700 transition-colors"
+            >
+              Logout
+            </button>
+          )}
         </div>
       </div>
 
