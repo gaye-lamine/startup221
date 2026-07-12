@@ -7,6 +7,7 @@ from app.core.database import engine
 from app.routers import startups
 from app.routers import dashboard
 from app.routers import investors
+from app.routers import auth
 from sqlmodel import SQLModel
 # Import models for SQLModel metadata registration
 from app.entities.startup import Startup
@@ -52,6 +53,7 @@ app.add_middleware(
 app.include_router(startups.router, prefix="/api/v1")
 app.include_router(dashboard.router, prefix="/api/v1")
 app.include_router(investors.router, prefix="/api/v1")
+app.include_router(auth.router, prefix="/api/v1")
 
 
 @app.get("/health")

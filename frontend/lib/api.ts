@@ -21,4 +21,7 @@ export const API = {
   investors: {
     subscribe: `${API_BASE}/api/v1/investors/subscribe`,
   },
+  auth: {
+    login: `${API_BASE}/api/v1/auth/login`,
+  },
 } as const;

@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { API } from "../../../lib/api";
 
 interface Lead {
@@ -13,7 +14,8 @@ interface Lead {
 }
 
 export default function MessagesPage() {
-  const [slug] = useState("senpay");
+  const router = useRouter();
+  const [slug, setSlug] = useState<string | null>(null);
   const [leads, setLeads] = useState<Lead[]>([]);
   const [loading, setLoading] = useState(true);
   const [replyingTo, setReplyingTo] = useState<Lead | null>(null);
@@ -21,7 +23,18 @@ export default function MessagesPage() {
   const [sending, setSending] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
 
+  useEffect(() => {
+    const session = localStorage.getItem("startup_session");
+    const storedSlug = localStorage.getItem("startup_slug");
+    if (session !== "true" || !storedSlug) {
+      router.push("/");
+    } else {
+      setSlug(storedSlug);
+    }
+  }, [router]);
+
   async function loadLeads() {
+    if (!slug) return;
     try {
       const res = await fetch(API.dashboard.leads(slug));
       if (res.ok) {

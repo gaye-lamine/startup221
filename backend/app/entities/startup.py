@@ -16,6 +16,8 @@ class Startup(SQLModel, table=True):
     )
     name: str = Field(index=True)
     slug: str = Field(unique=True, index=True)
+    email: str = Field(unique=True, index=True, nullable=False)
+    hashed_password: str = Field(nullable=False)
     logo_url: str
     sector: str = Field(index=True)
     employee_count: int = Field(index=True, default=0)

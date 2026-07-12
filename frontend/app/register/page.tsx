@@ -11,6 +11,8 @@ export default function RegisterPage() {
 
   // Form Field States
   const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [city, setCity] = useState("");
   const [mission, setMission] = useState("");
   const [problem, setProblem] = useState("");
@@ -42,6 +44,8 @@ export default function RegisterPage() {
   const validateStep1 = () => {
     const newErrors: Record<string, string> = {};
     if (!name.trim()) newErrors.name = "Le nom de la startup est requis";
+    if (!email.trim() || !email.includes("@")) newErrors.email = "Une adresse email valide est requise";
+    if (!password.trim() || password.length < 6) newErrors.password = "Le mot de passe doit faire au moins 6 caractères";
     if (!city.trim()) newErrors.city = "La ville de localisation est requise";
     if (!mission.trim()) newErrors.mission = "La description de votre mission est requise";
     if (!problem.trim()) newErrors.problem = "Veuillez définir le problème";
@@ -81,6 +85,8 @@ export default function RegisterPage() {
     const payload = {
       name,
       slug: generateSlug(name) || "startup-" + Math.floor(Math.random() * 1000),
+      email,
+      password,
       logo_url: logoUrl || "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=100&auto=format&fit=crop",
       sector,
       employee_count: Number(employeeCount),
@@ -105,9 +111,14 @@ export default function RegisterPage() {
 
       if (res.ok) {
         setSubmitted(true);
+        // Automatically sign in the founder
+        localStorage.setItem("startup_session", "true");
+        localStorage.setItem("startup_slug", payload.slug);
+        localStorage.setItem("startup_name", name);
         setTimeout(() => {
-          router.push("/");
-        }, 2500);
+          router.push("/dashboard");
+          window.location.reload(); // Force header state refresh
+        }, 2000);
       } else {
         const data = await res.json();
         setSubmitError(data.detail || "Une erreur est survenue lors de l'enregistrement.");
@@ -223,6 +234,36 @@ export default function RegisterPage() {
                         <option key={sec} value={sec}>{sec}</option>
                       ))}
                     </select>
+                  </div>
+                </div>
+
+                {/* Email and Password Credentials */}
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">
+                      Adresse Email (Connexion)
+                    </label>
+                    <input
+                      type="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      className="w-full border border-slate-200 px-4 py-2.5 rounded-xl text-sm outline-none focus:border-brand-active focus:ring-2 focus:ring-brand-50"
+                      placeholder="Ex: fondateur@senpay.sn"
+                    />
+                    {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email}</p>}
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">
+                      Mot de passe
+                    </label>
+                    <input
+                      type="password"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      className="w-full border border-slate-200 px-4 py-2.5 rounded-xl text-sm outline-none focus:border-brand-active focus:ring-2 focus:ring-brand-50"
+                      placeholder="Min. 6 caractères"
+                    />
+                    {errors.password && <p className="text-red-500 text-xs mt-1">{errors.password}</p>}
                   </div>
                 </div>
 

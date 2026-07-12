@@ -10,7 +10,7 @@ export default function Header() {
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [loginError, setLoginError] = useState<string | null>(null);
 
   // Simulated logged-in state using localStorage for cross-page persistence
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -22,21 +22,44 @@ export default function Header() {
     }
   }, []);
 
-  const handleLoginSubmit = (e: React.FormEvent) => {
+  const handleLoginSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setTimeout(() => {
+    setLoginError(null);
+
+    try {
+      const res = await fetch(API.auth.login, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        setIsLoggedIn(true);
+        localStorage.setItem("startup_session", "true");
+        localStorage.setItem("startup_slug", data.slug);
+        localStorage.setItem("startup_name", data.name);
+        
+        setShowLoginModal(false);
+        router.push("/dashboard");
+        window.location.reload(); // Force refresh to re-evaluate the header
+      } else {
+        const data = await res.json();
+        setLoginError(data.detail || "Identifiants invalides.");
+      }
+    } catch (err) {
+      setLoginError("Impossible de contacter le serveur d'authentification.");
+    } finally {
       setLoading(false);
-      setShowLoginModal(false);
-      setIsLoggedIn(true);
-      localStorage.setItem("startup_session", "true");
-      router.push("/dashboard");
-    }, 800);
+    }
   };
 
   const handleLogout = () => {
     setIsLoggedIn(false);
     localStorage.removeItem("startup_session");
+    localStorage.removeItem("startup_slug");
+    localStorage.removeItem("startup_name");
     router.push("/");
   };
 
@@ -131,6 +154,12 @@ export default function Header() {
             <p className="text-xs text-slate-400 mb-6">
               Connectez-vous pour gérer votre profil et répondre aux investisseurs.
             </p>
+
+            {loginError && (
+              <div className="bg-red-50 border border-red-100 text-red-700 p-3 rounded-xl text-xs font-semibold mb-4">
+                {loginError}
+              </div>
+            )}
 
             <form onSubmit={handleLoginSubmit} className="space-y-4">
               <div>

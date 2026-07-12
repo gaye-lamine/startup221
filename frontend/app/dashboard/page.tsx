@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { API } from "../../lib/api";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -135,12 +136,13 @@ function ReplyModal({
 // ─── Main Page ────────────────────────────────────────────────────────────────
 
 export default function DashboardPage() {
+  const router = useRouter();
   const [primaryColor, setPrimaryColor] = useState("#4f46e5");
   const [colorLabel, setColorLabel] = useState("Indigo");
   const [editingColor, setEditingColor] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [replyLead, setReplyLead] = useState<Lead | null>(null);
-  const [slug] = useState("senpay");
+  const [slug, setSlug] = useState<string | null>(null);
 
   const [stats, setStats] = useState({
     profile_views: 0,
@@ -150,8 +152,21 @@ export default function DashboardPage() {
   const [leads, setLeads] = useState<Lead[]>([]);
   const [loading, setLoading] = useState(true);
 
+  // Authentication check and dynamic slug retrieval
+  useEffect(() => {
+    const session = localStorage.getItem("startup_session");
+    const storedSlug = localStorage.getItem("startup_slug");
+    
+    if (session !== "true" || !storedSlug) {
+      router.push("/"); // Redirect guest to home directory
+    } else {
+      setSlug(storedSlug);
+    }
+  }, [router]);
+
   // Load real dynamic data from Backend
   async function loadDashboardData() {
+    if (!slug) return;
     try {
       // 1. Fetch startup profile (to get primary color)
       const profileRes = await fetch(API.startups.bySlug(slug));

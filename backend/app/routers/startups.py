@@ -44,6 +44,8 @@ class StartupRead(BaseModel):
 class StartupCreate(BaseModel):
     name: str
     slug: str
+    email: str
+    password: str
     logo_url: str
     sector: str
     employee_count: int = Field(default=0, ge=0)
@@ -138,10 +140,29 @@ async def create_startup(
     Endpoint to add a new startup.
     Useful for populating the database and verifying write actions.
     """
+    from app.core.security import hash_password
+    from fastapi import HTTPException
+    
     db_repo = PostgresStartupRepository(session)
+    
+    # Check if slug already exists
+    existing_slug = await db_repo.get_by_slug(payload.slug)
+    if existing_slug:
+        raise HTTPException(status_code=400, detail="Ce nom de startup/slug existe déjà.")
+        
+    # Check if email already exists
+    from sqlmodel import select, col
+    existing_email_res = await session.execute(
+        select(Startup).where(col(Startup.email) == payload.email)
+    )
+    if existing_email_res.scalar_one_or_none():
+        raise HTTPException(status_code=400, detail="Cette adresse email est déjà associée à une startup.")
+        
     startup = Startup(
         name=payload.name,
         slug=payload.slug,
+        email=payload.email,
+        hashed_password=hash_password(payload.password),
         logo_url=payload.logo_url,
         sector=payload.sector,
         employee_count=payload.employee_count,

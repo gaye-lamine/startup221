@@ -1,11 +1,20 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 
 export default function SettingsPage() {
+  const router = useRouter();
   const [notifications, setNotifications] = useState(true);
   const [apiAccess, setApiAccess] = useState(false);
   const [saved, setSaved] = useState(false);
+
+  useEffect(() => {
+    const session = localStorage.getItem("startup_session");
+    if (session !== "true") {
+      router.push("/");
+    }
+  }, [router]);
 
   const handleSave = () => {
     setSaved(true);

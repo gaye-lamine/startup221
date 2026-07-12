@@ -1,10 +1,12 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { API } from "../../../lib/api";
 
 export default function EditProfilePage() {
-  const [slug] = useState("senpay");
+  const router = useRouter();
+  const [slug, setSlug] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
@@ -22,7 +24,18 @@ export default function EditProfilePage() {
   });
 
   useEffect(() => {
+    const session = localStorage.getItem("startup_session");
+    const storedSlug = localStorage.getItem("startup_slug");
+    if (session !== "true" || !storedSlug) {
+      router.push("/");
+    } else {
+      setSlug(storedSlug);
+    }
+  }, [router]);
+
+  useEffect(() => {
     async function loadProfile() {
+      if (!slug) return;
       try {
         const res = await fetch(API.startups.bySlug(slug));
         if (res.ok) {

@@ -9,6 +9,7 @@ from sqlmodel.ext.asyncio.session import AsyncSession
 from app.core.config import settings
 from app.entities.startup import Startup
 from app.entities.lead import Lead
+from app.core.security import hash_password
 
 async def seed():
     engine = create_async_engine(settings.DATABASE_URL)
@@ -18,12 +19,14 @@ async def seed():
         expire_on_commit=False,
     )
     
-    # Startups real seed data
+    # Startups real seed data with authentication emails and passwords
     startups = [
         Startup(
             id=uuid.uuid4(),
             name="SenPay",
             slug="senpay",
+            email="fondateur@senpay.sn",
+            hashed_password=hash_password("password123"),
             logo_url="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=100&auto=format&fit=crop",
             sector="Fintech",
             employee_count=18,
@@ -42,6 +45,8 @@ async def seed():
             id=uuid.uuid4(),
             name="SunuField",
             slug="sunufield",
+            email="fondateur@sunufield.sn",
+            hashed_password=hash_password("password123"),
             logo_url="https://images.unsplash.com/photo-1593113598332-cd288d649433?w=100&auto=format&fit=crop",
             sector="AgriTech",
             employee_count=8,
@@ -60,6 +65,8 @@ async def seed():
             id=uuid.uuid4(),
             name="FastLivr",
             slug="fastlivr",
+            email="fondateur@fastlivr.sn",
+            hashed_password=hash_password("password123"),
             logo_url="https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?w=100&auto=format&fit=crop",
             sector="Logistique",
             employee_count=48,
@@ -78,6 +85,8 @@ async def seed():
             id=uuid.uuid4(),
             name="SanteConnect",
             slug="santeconnect",
+            email="fondateur@santeconnect.sn",
+            hashed_password=hash_password("password123"),
             logo_url="https://images.unsplash.com/photo-1576091160550-2173dba999ef?w=100&auto=format&fit=crop",
             sector="HealthTech",
             employee_count=22,
