@@ -351,10 +351,18 @@ export default function ForInvestorsPage() {
               </div>
 
               {error && (
-                <p className="mt-3 text-sm text-amber-300 font-medium flex items-center gap-1.5 justify-center">
-                  <span>&#9888;</span>
-                  {error}
-                </p>
+                <div className="space-y-4 mt-3">
+                  <p className="text-sm text-amber-300 font-medium flex items-center gap-1.5 justify-center">
+                    <span>&#9888;</span>
+                    {error}
+                  </p>
+                  <Link
+                    href="/"
+                    className="inline-block bg-white/20 hover:bg-white/30 text-white font-bold text-xs px-5 py-2.5 rounded-xl transition-all border border-white/10"
+                  >
+                    Accéder directement à l'annuaire de startups &rarr;
+                  </Link>
+                </div>
               )}
 
               <p className="text-white/40 text-xs mt-4">
@@ -363,18 +371,28 @@ export default function ForInvestorsPage() {
             </form>
           ) : (
             /* Success state */
-            <div className="bg-white/10 border border-white/20 backdrop-blur-sm rounded-2xl p-8 max-w-md mx-auto">
-              <div className="w-14 h-14 bg-emerald-500/20 border border-emerald-400/30 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl">
+            <div className="bg-white/10 border border-white/20 backdrop-blur-sm rounded-2xl p-8 max-w-md mx-auto space-y-5">
+              <div className="w-14 h-14 bg-emerald-500/20 border border-emerald-400/30 rounded-full flex items-center justify-center mx-auto text-3xl">
                 &#10003;
               </div>
-              <h3 className="text-xl font-extrabold text-white mb-2">
-                Vous êtes sur la liste ! 🎉
-              </h3>
-              <p className="text-white/70 text-sm leading-relaxed">
-                Votre demande d'accès a bien été enregistrée. Notre équipe vous contactera sous{" "}
-                <strong className="text-white">48h</strong> avec vos identifiants.
-              </p>
-              <div className="mt-5 pt-5 border-t border-white/10 flex items-center justify-center gap-2 text-xs text-white/50">
+              <div>
+                <h3 className="text-xl font-extrabold text-white mb-2">
+                  Vous êtes sur la liste ! 🎉
+                </h3>
+                <p className="text-white/70 text-sm leading-relaxed">
+                  Votre demande d'accès a bien été enregistrée. Notre équipe vous contactera sous{" "}
+                  <strong className="text-white">48h</strong> avec vos identifiants.
+                </p>
+              </div>
+              <div>
+                <Link
+                  href="/"
+                  className="inline-block w-full bg-white text-brand-active font-bold text-sm py-3 rounded-xl hover:bg-white/95 transition-all shadow-md"
+                >
+                  Découvrir l'annuaire public &rarr;
+                </Link>
+              </div>
+              <div className="pt-4 border-t border-white/10 flex items-center justify-center gap-2 text-xs text-white/50">
                 <span className="text-emerald-400">&#10003;</span>
                 Confirmation envoyée à <strong className="text-white/70">{email}</strong>
               </div>
