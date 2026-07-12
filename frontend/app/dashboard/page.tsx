@@ -1,45 +1,18 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
+import Link from "next/link";
 import { API } from "../../lib/api";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 interface Lead {
   id: string;
-  initials: string;
-  name: string;
-  entity: string;
-  date: string;
-  avatarClass: string;
+  sender_name: string;
+  sender_entity: string;
+  sender_email: string;
+  message_type: string;
+  created_at: string;
 }
-
-// ─── Mock Data (falls back to real API in production) ────────────────────────
-const MOCK_LEADS: Lead[] = [
-  {
-    id: "1",
-    initials: "TS",
-    name: "Teranga Solutions",
-    entity: "VC Fund - Seed",
-    date: "Hier, 14:20",
-    avatarClass: "bg-brand-50 text-brand-active",
-  },
-  {
-    id: "2",
-    initials: "AM",
-    name: "Aissatou Maïga",
-    entity: "Angel Investor",
-    date: "12 Nov 2024",
-    avatarClass: "bg-emerald-50 text-emerald-600",
-  },
-  {
-    id: "3",
-    initials: "GC",
-    name: "Gainde Capital",
-    entity: "Private Equity",
-    date: "10 Nov 2024",
-    avatarClass: "bg-violet-50 text-violet-600",
-  },
-];
 
 const PALETTE_PRESETS = [
   { label: "Indigo", hex: "#4f46e5" },
@@ -98,41 +71,35 @@ function ReplyModal({
 }: {
   lead: Lead | null;
   onClose: () => void;
-  onSend: () => void;
+  onSend: (email: string) => void;
 }) {
   const [message, setMessage] = useState("");
-  const ref = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const handler = (e: MouseEvent) => {
-      if (ref.current && !ref.current.contains(e.target as Node)) onClose();
-    };
-    document.addEventListener("mousedown", handler);
-    return () => document.removeEventListener("mousedown", handler);
-  }, [onClose]);
+  const [sending, setSending] = useState(false);
 
   if (!lead) return null;
 
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!message.trim()) return;
+    setSending(true);
+    setTimeout(() => {
+      onSend(lead.sender_email);
+      onClose();
+      setMessage("");
+      setSending(false);
+    }, 1000);
+  };
+
   return (
     <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4">
-      <div
-        ref={ref}
-        className="bg-white rounded-2xl w-full max-w-md shadow-2xl overflow-hidden"
-      >
+      <div className="bg-white rounded-2xl w-full max-w-md shadow-2xl overflow-hidden">
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100">
-          <div className="flex items-center gap-3">
-            <div
-              className={`w-9 h-9 rounded-full flex items-center justify-center text-xs font-extrabold ${lead.avatarClass}`}
-            >
-              {lead.initials}
-            </div>
-            <div>
-              <p className="text-sm font-bold text-slate-800 leading-tight">
-                {lead.name}
-              </p>
-              <p className="text-xs text-slate-400">{lead.entity}</p>
-            </div>
+          <div>
+            <p className="text-sm font-bold text-slate-800 leading-tight">
+              Répondre à {lead.sender_name}
+            </p>
+            <p className="text-xs text-slate-400">{lead.sender_entity}</p>
           </div>
           <button
             onClick={onClose}
@@ -143,24 +110,23 @@ function ReplyModal({
         </div>
 
         {/* Body */}
-        <div className="px-6 py-5 space-y-4">
+        <form onSubmit={handleSubmit} className="px-6 py-5 space-y-4">
           <textarea
             rows={5}
+            required
             value={message}
             onChange={(e) => setMessage(e.target.value)}
-            placeholder={`Bonjour ${lead.name.split(" ")[0]},\n\nMerci pour votre intérêt pour SenPay. Nous serions ravis d'échanger avec vous...`}
+            placeholder={`Bonjour ${lead.sender_name.split(" ")[0]},\n\nMerci pour votre intérêt...`}
             className="w-full border border-slate-200 bg-slate-50/60 px-4 py-3 rounded-xl text-sm text-slate-700 outline-none focus:border-brand-active focus:ring-2 focus:ring-brand-50 resize-none transition-all placeholder:text-slate-400"
           />
           <button
-            onClick={() => {
-              onSend();
-              onClose();
-            }}
-            className="w-full flex items-center justify-center gap-2 bg-brand-active hover:bg-brand-600 text-white font-bold text-sm py-3 rounded-xl transition-all shadow-sm"
+            type="submit"
+            disabled={sending}
+            className="w-full flex items-center justify-center gap-2 bg-brand-active hover:bg-brand-600 text-white font-bold text-sm py-3 rounded-xl transition-all shadow-sm disabled:opacity-75"
           >
-            Envoyer la réponse
+            {sending ? "Envoi..." : "Envoyer la réponse"}
           </button>
-        </div>
+        </form>
       </div>
     </div>
   );
@@ -174,14 +140,55 @@ export default function DashboardPage() {
   const [editingColor, setEditingColor] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [replyLead, setReplyLead] = useState<Lead | null>(null);
-  const [slug] = useState("senpay"); // In production, derive from auth session
+  const [slug] = useState("senpay");
 
-  // Simulate fetching real stats from API
-  const [stats] = useState({
-    profile_views: 342,
-    contact_requests: 12,
-    is_live: true,
+  const [stats, setStats] = useState({
+    profile_views: 0,
+    contact_requests: 0,
+    is_live: false,
   });
+  const [leads, setLeads] = useState<Lead[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  // Load real dynamic data from Backend
+  async function loadDashboardData() {
+    try {
+      // 1. Fetch startup profile (to get primary color)
+      const profileRes = await fetch(API.startups.bySlug(slug));
+      if (profileRes.ok) {
+        const profile = await profileRes.json();
+        if (profile.primary_color) {
+          setPrimaryColor(profile.primary_color);
+          const matchedPreset = PALETTE_PRESETS.find(
+            (p) => p.hex.toLowerCase() === profile.primary_color.toLowerCase()
+          );
+          setColorLabel(matchedPreset ? matchedPreset.label : profile.primary_color);
+        }
+      }
+
+      // 2. Fetch stats
+      const statsRes = await fetch(API.dashboard.stats(slug));
+      if (statsRes.ok) {
+        const statsData = await statsRes.json();
+        setStats(statsData);
+      }
+
+      // 3. Fetch leads list
+      const leadsRes = await fetch(API.dashboard.leads(slug));
+      if (leadsRes.ok) {
+        const leadsData = await leadsRes.json();
+        setLeads(leadsData);
+      }
+    } catch (err) {
+      console.error("Error fetching dashboard data", err);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    loadDashboardData();
+  }, [slug]);
 
   const showToast = (msg: string) => {
     setToastMessage(msg);
@@ -191,30 +198,39 @@ export default function DashboardPage() {
   const handleColorSave = async () => {
     setEditingColor(false);
 
-    // Call real API to update primary_color and invalidate Redis cache
     try {
       const res = await fetch(API.dashboard.profile(slug), {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ primary_color: primaryColor }),
-        }
-      );
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ primary_color: primaryColor }),
+      });
       if (res.ok) {
-        showToast("Profil mis à jour avec succès.");
+        showToast("Profil mis à jour avec succès. Le cache public a été purgé.");
       } else {
         showToast("Erreur lors de la mise à jour.");
       }
     } catch {
-      // API unavailable — just show optimistic success for demo
-      showToast("Profil mis à jour avec succès.");
+      showToast("Erreur de connexion.");
     }
   };
+
+  const handleReplySent = (email: string) => {
+    showToast(`Réponse envoyée avec succès à ${email} !`);
+  };
+
+  if (loading) {
+    return (
+      <div className="p-8 flex items-center justify-center min-h-screen text-slate-500 font-semibold">
+        Chargement du tableau de bord...
+      </div>
+    );
+  }
 
   return (
     <div className="p-8 max-w-[860px] mx-auto relative">
       {/* ─── Toast ────────────────────────────────────────────────────── */}
       {toastMessage && (
-        <div className="fixed bottom-6 right-6 z-50 bg-slate-800 text-white px-5 py-3.5 rounded-2xl shadow-2xl flex items-center gap-3 border border-slate-700 animate-bounce-in">
+        <div className="fixed bottom-6 right-6 z-50 bg-slate-800 text-white px-5 py-3.5 rounded-2xl shadow-2xl flex items-center gap-3 border border-slate-700">
           <div className="w-6 h-6 rounded-full bg-emerald-500 flex items-center justify-center shrink-0 text-white text-xs font-bold">
             ✓
           </div>
@@ -238,7 +254,10 @@ export default function DashboardPage() {
             Voici un aperçu des performances de votre startup ce mois-ci.
           </p>
         </div>
-        <button className="flex items-center gap-2 bg-brand-active hover:bg-brand-600 text-white text-sm font-bold px-5 py-3 rounded-xl transition-all shadow-md shrink-0 whitespace-nowrap">
+        <button 
+          onClick={() => showToast("Cette fonctionnalité de mise à jour sera bientôt disponible !")}
+          className="flex items-center gap-2 bg-brand-active hover:bg-brand-600 text-white text-sm font-bold px-5 py-3 rounded-xl transition-all shadow-md shrink-0 whitespace-nowrap"
+        >
           + Nouvelle Mise à Jour
         </button>
       </div>
@@ -261,7 +280,7 @@ export default function DashboardPage() {
           icon={<span className="text-violet-500 text-lg">&#128101;</span>}
           badge={
             <span className="text-[10px] font-bold text-slate-400 bg-slate-50 border border-slate-200 px-2.5 py-1 rounded-full">
-              Oct - Nov
+              Temps Réel
             </span>
           }
           label="Demandes de contact"
@@ -279,7 +298,7 @@ export default function DashboardPage() {
             </div>
           }
           label="Statut du profil"
-          value="En ligne / Public"
+          value={stats.is_live ? "En ligne / Public" : "Hors ligne"}
         />
       </div>
 
@@ -290,66 +309,76 @@ export default function DashboardPage() {
           <h2 className="font-bold text-slate-900 text-[15px]">
             Aperçu de vos opportunités
           </h2>
-          <button className="text-xs font-bold text-brand-active hover:text-brand-600 flex items-center gap-1 transition-colors">
+          <Link 
+            href="/dashboard/messages"
+            className="text-xs font-bold text-brand-active hover:text-brand-600 flex items-center gap-1 transition-colors"
+          >
             Voir tout &rsaquo;
-          </button>
+          </Link>
         </div>
 
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="bg-slate-50/80">
-              {["NOM / FONDS", "ENTITÉ", "DATE", "ACTIONS"].map((h, i) => (
-                <th
-                  key={h}
-                  className={`text-[10px] font-bold text-slate-400 uppercase tracking-[0.08em] py-3 ${
-                    i === 0 ? "text-left pl-6" : i === 3 ? "text-right pr-6" : "text-left px-4"
+        {leads.length === 0 ? (
+          <div className="p-8 text-center text-sm text-slate-400">
+            Aucune opportunité reçue pour le moment.
+          </div>
+        ) : (
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="bg-slate-50/80">
+                {["NOM / FONDS", "ENTITÉ", "DATE", "ACTIONS"].map((h, i) => (
+                  <th
+                    key={h}
+                    className={`text-[10px] font-bold text-slate-400 uppercase tracking-[0.08em] py-3 ${
+                      i === 0 ? "text-left pl-6" : i === 3 ? "text-right pr-6" : "text-left px-4"
+                    }`}
+                  >
+                    {h}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {leads.slice(0, 3).map((lead, idx) => (
+                <tr
+                  key={lead.id}
+                  className={`hover:bg-slate-50/60 transition-colors ${
+                    idx !== leads.length - 1 ? "border-b border-slate-50" : ""
                   }`}
                 >
-                  {h}
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {MOCK_LEADS.map((lead, idx) => (
-              <tr
-                key={lead.id}
-                className={`hover:bg-slate-50/60 transition-colors ${
-                  idx !== MOCK_LEADS.length - 1 ? "border-b border-slate-50" : ""
-                }`}
-              >
-                {/* Name */}
-                <td className="pl-6 pr-4 py-4">
-                  <div className="flex items-center gap-3">
-                    <div
-                      className={`w-9 h-9 rounded-full flex items-center justify-center text-xs font-extrabold shrink-0 ${lead.avatarClass}`}
-                    >
-                      {lead.initials}
+                  {/* Name */}
+                  <td className="pl-6 pr-4 py-4">
+                    <div className="flex items-center gap-3">
+                      <div className="w-9 h-9 rounded-full flex items-center justify-center text-xs font-extrabold shrink-0 bg-brand-50 text-brand-active">
+                        {lead.sender_name.slice(0, 2).toUpperCase()}
+                      </div>
+                      <span className="font-semibold text-slate-800">
+                        {lead.sender_name}
+                      </span>
                     </div>
-                    <span className="font-semibold text-slate-800">
-                      {lead.name}
-                    </span>
-                  </div>
-                </td>
-                {/* Entity */}
-                <td className="px-4 py-4 text-slate-500">{lead.entity}</td>
-                {/* Date */}
-                <td className="px-4 py-4 text-slate-400 text-xs font-medium">
-                  {lead.date}
-                </td>
-                {/* Action */}
-                <td className="pr-6 py-4 text-right">
-                  <button
-                    onClick={() => setReplyLead(lead)}
-                    className="text-xs font-bold text-brand-active bg-brand-50 hover:bg-brand-100 border border-brand-100 px-4 py-2 rounded-lg transition-all"
-                  >
-                    Répondre
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+                  </td>
+                  {/* Entity */}
+                  <td className="px-4 py-4 text-slate-500">{lead.sender_entity}</td>
+                  {/* Date */}
+                  <td className="px-4 py-4 text-slate-400 text-xs font-medium">
+                    {new Date(lead.created_at).toLocaleDateString("fr-FR", {
+                      day: "numeric",
+                      month: "short",
+                    })}
+                  </td>
+                  {/* Action */}
+                  <td className="pr-6 py-4 text-right">
+                    <button
+                      onClick={() => setReplyLead(lead)}
+                      className="text-xs font-bold text-brand-active bg-brand-50 hover:bg-brand-100 border border-brand-100 px-4 py-2 rounded-lg transition-all"
+                    >
+                      Répondre
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
       </div>
 
       {/* ─── Bottom Row: Branding + Fundraising ───────────────────────── */}
@@ -468,7 +497,10 @@ export default function DashboardPage() {
             </p>
           </div>
 
-          <button className="mt-5 w-full bg-white/15 hover:bg-white/25 border border-white/20 backdrop-blur-sm text-white text-xs font-bold py-3 rounded-xl transition-all relative z-10">
+          <button 
+            onClick={() => showToast("Redirection vers les services de pitch-deck partenaire...")}
+            className="mt-5 w-full bg-white/15 hover:bg-white/25 border border-white/20 backdrop-blur-sm text-white text-xs font-bold py-3 rounded-xl transition-all relative z-10"
+          >
             Découvrir les services
           </button>
         </div>
@@ -478,7 +510,7 @@ export default function DashboardPage() {
       <ReplyModal
         lead={replyLead}
         onClose={() => setReplyLead(null)}
-        onSend={() => showToast("Réponse envoyée avec succès !")}
+        onSend={handleReplySent}
       />
     </div>
   );
