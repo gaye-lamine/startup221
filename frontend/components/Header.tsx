@@ -11,6 +11,7 @@ export default function Header() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loginError, setLoginError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
 
   // Simulated logged-in state using localStorage for cross-page persistence
   const [isLoggedIn, setIsLoggedIn] = useState(false);
