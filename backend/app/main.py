@@ -7,14 +7,15 @@ from typing import List, Optional
 from fastapi import FastAPI, Depends, HTTPException, Query, status
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, EmailStr
-from sqlmodel import SQLModel, Field as SQLField, Column, JSON, select, func, or_, col, cast, String
+from sqlmodel import SQLModel, select, func, or_, col, cast, String
 from sqlalchemy.ext.asyncio import create_async_engine
 from sqlalchemy.orm import sessionmaker
 from sqlmodel.ext.asyncio.session import AsyncSession
-from sqlalchemy.dialects.postgresql import JSONB
 import redis.asyncio as aioredis
 
 from app.core.config import settings
+# Import the existing single definition of Startup to prevent SQLAlchemy double-registration errors
+from app.entities.startup import Startup
 
 # ---------------------------------------------------------------------------
 # Redis Client Wrapper
@@ -46,47 +47,6 @@ async_session = sessionmaker(engine, class_=AsyncSession, expire_on_commit=False
 async def get_session() -> AsyncSession:
     async with async_session() as session:
         yield session
-
-# ---------------------------------------------------------------------------
-# Database Models (SQLModel)
-# ---------------------------------------------------------------------------
-class Startup(SQLModel, table=True):
-    __tablename__ = "startups"
-
-    id: uuid.UUID = SQLField(
-        default_factory=uuid.uuid4,
-        primary_key=True,
-        index=True,
-        nullable=False,
-    )
-    name: str = SQLField(index=True)
-    slug: str = SQLField(unique=True, index=True)
-    email: str = SQLField(unique=True, index=True, nullable=False)
-    hashed_password: str = SQLField(nullable=False)
-    logo_url: str
-    sector: str = SQLField(index=True)
-    employee_count: int = SQLField(index=True, default=0)
-    description: str
-    primary_color: str = SQLField(default="#3545E6")
-    funding_stage: str = SQLField(default="Amorçage / Seed")
-    city: str = SQLField(default="Dakar, Sénégal")
-    website_url: str = SQLField(default="#")
-    linkedin_url: str = SQLField(default="#")
-    twitter_url: str = SQLField(default="#")
-    problem_statement: str = SQLField(default="")
-    solution_statement: str = SQLField(default="")
-    
-    seeking: List[str] = SQLField(
-        sa_column=Column(
-            JSON().with_variant(JSONB, "postgresql"),
-            nullable=False,
-            default=list
-        )
-    )
-    created_at: datetime = SQLField(
-        default_factory=datetime.utcnow,
-        sa_column_kwargs={"server_default": func.now()}
-    )
 
 # ---------------------------------------------------------------------------
 # Pydantic Schemas for Validation and API Response
@@ -150,6 +110,8 @@ app.add_middleware(
     allow_origins=[
         "http://localhost:3000",
         "http://localhost:3001",
+        "http://127.0.0.1:3000",
+        "http://127.0.0.1:3001",
         "https://startup221.netlify.app",
     ],
     allow_credentials=True,
@@ -248,7 +210,7 @@ async def list_startups(
 
     if seeking:
         for need in seeking:
-            # Operational contains expression on JSON arrays
+            # Operational contains expression or cast fallback on JSON arrays
             query = query.where(col(Startup.seeking).contains(need))
 
     count_query = select(func.count()).select_from(query.subquery())
