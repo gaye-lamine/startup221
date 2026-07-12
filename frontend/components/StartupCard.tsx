@@ -1,6 +1,6 @@
 import React from "react";
 import Link from "next/link";
-import { Users, Coins, HelpCircle } from "lucide-react";
+
 
 export interface Startup {
   id: string;
@@ -124,7 +124,7 @@ export default function StartupCard({ startup }: StartupCardProps) {
         <div className="flex flex-wrap items-center gap-3 text-xs">
           {/* Employee Count */}
           <div className="flex items-center gap-1.5 text-slate-500 font-medium">
-            <Users className="w-4 h-4 text-slate-400" />
+            <span className="text-slate-400 text-xs">👥</span>
             <span>{getEmployeeRange(startup.employee_count)}</span>
           </div>
 

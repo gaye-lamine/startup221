@@ -3,24 +3,12 @@
 import React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import {
-  LayoutDashboard,
-  UserCog,
-  MessageSquare,
-  Settings,
-  ArrowLeft,
-} from "lucide-react";
 
 const NAV_ITEMS = [
-  { label: "Overview", href: "/dashboard", icon: LayoutDashboard },
-  { label: "Edit Profile", href: "/dashboard/profile", icon: UserCog },
-  {
-    label: "Messages",
-    href: "/dashboard/messages",
-    icon: MessageSquare,
-    badge: 3,
-  },
-  { label: "Settings", href: "/dashboard/settings", icon: Settings },
+  { label: "Overview", href: "/dashboard" },
+  { label: "Edit Profile", href: "/dashboard/profile" },
+  { label: "Messages", href: "/dashboard/messages", badge: 3 },
+  { label: "Settings", href: "/dashboard/settings" },
 ];
 
 export default function DashboardLayout({
@@ -46,7 +34,7 @@ export default function DashboardLayout({
 
         {/* Nav */}
         <nav className="flex flex-col gap-0.5 px-3 pb-4 flex-grow">
-          {NAV_ITEMS.map(({ label, href, icon: Icon, badge }) => {
+          {NAV_ITEMS.map(({ label, href, badge }) => {
             const isActive = pathname === href;
             return (
               <Link
@@ -58,10 +46,7 @@ export default function DashboardLayout({
                     : "text-slate-500 hover:text-slate-800 hover:bg-slate-50"
                 }`}
               >
-                <div className="flex items-center gap-3">
-                  <Icon className="w-4 h-4 shrink-0" />
-                  <span>{label}</span>
-                </div>
+                <span>{label}</span>
                 {badge && (
                   <span className="w-5 h-5 rounded-full bg-red-500 text-white text-[10px] font-bold flex items-center justify-center shrink-0">
                     {badge}
@@ -78,16 +63,14 @@ export default function DashboardLayout({
             href="/"
             className="flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-medium text-slate-400 hover:text-slate-600 hover:bg-slate-50 transition-colors"
           >
-            <ArrowLeft className="w-3.5 h-3.5" />
-            <span>Retour au site</span>
+            &larr; Retour au site
           </Link>
         </div>
 
         {/* User info */}
         <div className="border-t border-slate-100 p-4 flex items-center gap-3">
-          {/* Avatar with photo placeholder */}
-          <div className="w-9 h-9 rounded-full bg-gradient-to-br from-slate-300 to-slate-400 flex items-center justify-center text-white font-bold text-sm shrink-0 overflow-hidden">
-            <span className="text-xs font-extrabold">SP</span>
+          <div className="w-9 h-9 rounded-full bg-brand-active flex items-center justify-center text-white font-bold text-sm shrink-0">
+            SP
           </div>
           <div className="min-w-0">
             <p className="text-xs font-bold text-slate-800 truncate leading-tight">

@@ -1,5 +1,6 @@
 import React from "react";
-import { Globe, Send } from "lucide-react"; // Representing icons in mock
+
+import { Globe, Send } from "lucide-react"; // Kept only for social links — no visual icons
 
 export default function Footer() {
   return (
@@ -12,6 +13,14 @@ export default function Footer() {
             <p className="text-sm text-slate-500 max-w-xs leading-relaxed">
               Propulser l'écosystème technologique sénégalais vers de nouveaux sommets.
             </p>
+            <div className="flex gap-3">
+              <a href="#" className="text-xs font-semibold text-slate-500 hover:text-slate-900 transition-colors border border-slate-200 px-3 py-1.5 rounded-lg">
+                LinkedIn
+              </a>
+              <a href="#" className="text-xs font-semibold text-slate-500 hover:text-slate-900 transition-colors border border-slate-200 px-3 py-1.5 rounded-lg">
+                Twitter
+              </a>
+            </div>
           </div>
 
           {/* Navigation */}
@@ -21,7 +30,7 @@ export default function Footer() {
             </h3>
             <ul className="space-y-3">
               <li>
-                <a href="#" className="text-sm text-slate-600 hover:text-slate-900 transition-colors">
+                <a href="/" className="text-sm text-slate-600 hover:text-slate-900 transition-colors">
                   Directory
                 </a>
               </li>
@@ -31,7 +40,7 @@ export default function Footer() {
                 </a>
               </li>
               <li>
-                <a href="#" className="text-sm text-slate-600 hover:text-slate-900 transition-colors">
+                <a href="/for-investors" className="text-sm text-slate-600 hover:text-slate-900 transition-colors">
                   For Investors
                 </a>
               </li>
@@ -62,20 +71,12 @@ export default function Footer() {
             <h3 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-4">
               Communauté
             </h3>
-            <div className="flex gap-4">
-              <a
-                href="#"
-                className="p-2 text-slate-400 hover:text-slate-900 bg-slate-50 hover:bg-slate-100 rounded-full transition-all"
-                aria-label="Website"
-              >
-                <Globe className="w-5 h-5" />
+            <div className="flex gap-2">
+              <a href="#" className="text-xs font-semibold text-slate-500 hover:text-slate-900 border border-slate-200 px-3 py-1.5 rounded-lg transition-colors">
+                Website
               </a>
-              <a
-                href="#"
-                className="p-2 text-slate-400 hover:text-slate-900 bg-slate-50 hover:bg-slate-100 rounded-full transition-all"
-                aria-label="Telegram or Twitter"
-              >
-                <Send className="w-5 h-5" />
+              <a href="#" className="text-xs font-semibold text-slate-500 hover:text-slate-900 border border-slate-200 px-3 py-1.5 rounded-lg transition-colors">
+                Telegram
               </a>
             </div>
           </div>

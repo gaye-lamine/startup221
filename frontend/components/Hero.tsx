@@ -1,5 +1,4 @@
 import React, { useEffect, useRef } from "react";
-import { Search } from "lucide-react";
 
 interface HeroProps {
   searchQuery: string;
@@ -52,7 +51,7 @@ export default function Hero({
         {/* Search Bar Input Container */}
         <div className="max-w-2xl mx-auto relative flex items-center bg-white border border-slate-200 hover:border-slate-300 rounded-xl p-1.5 shadow-[0_4px_20px_rgba(53,69,230,0.04)] focus-within:ring-2 focus-within:ring-brand-active/20 focus-within:border-brand-active transition-all duration-200">
           <div className="flex items-center pl-3 flex-grow gap-2">
-            <Search className="w-5 h-5 text-slate-400 shrink-0" />
+            <span className="text-slate-400 text-base shrink-0">&#128269;</span>
             <input
               ref={inputRef}
               type="text"

@@ -2,18 +2,6 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import { API } from "../../lib/api";
-import {
-  Eye,
-  Users,
-  CheckCircle2,
-  TrendingUp,
-  Plus,
-  X,
-  Palette,
-  Rocket,
-  Send,
-  ChevronRight,
-} from "lucide-react";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 interface Lead {
@@ -148,9 +136,9 @@ function ReplyModal({
           </div>
           <button
             onClick={onClose}
-            className="text-slate-400 hover:text-slate-600 transition-colors"
+            className="text-slate-400 hover:text-slate-600 transition-colors text-xl leading-none font-bold"
           >
-            <X className="w-5 h-5" />
+            &times;
           </button>
         </div>
 
@@ -170,7 +158,6 @@ function ReplyModal({
             }}
             className="w-full flex items-center justify-center gap-2 bg-brand-active hover:bg-brand-600 text-white font-bold text-sm py-3 rounded-xl transition-all shadow-sm"
           >
-            <Send className="w-4 h-4" />
             Envoyer la réponse
           </button>
         </div>
@@ -228,15 +215,15 @@ export default function DashboardPage() {
       {/* ─── Toast ────────────────────────────────────────────────────── */}
       {toastMessage && (
         <div className="fixed bottom-6 right-6 z-50 bg-slate-800 text-white px-5 py-3.5 rounded-2xl shadow-2xl flex items-center gap-3 border border-slate-700 animate-bounce-in">
-          <div className="w-6 h-6 rounded-full bg-emerald-500 flex items-center justify-center shrink-0">
-            <CheckCircle2 className="w-3.5 h-3.5 text-white" />
+          <div className="w-6 h-6 rounded-full bg-emerald-500 flex items-center justify-center shrink-0 text-white text-xs font-bold">
+            ✓
           </div>
           <span className="text-sm font-semibold">{toastMessage}</span>
           <button
             onClick={() => setToastMessage(null)}
-            className="ml-1 text-slate-400 hover:text-white transition-colors"
+            className="ml-1 text-slate-400 hover:text-white transition-colors text-lg leading-none font-bold"
           >
-            <X className="w-4 h-4" />
+            &times;
           </button>
         </div>
       )}
@@ -252,18 +239,17 @@ export default function DashboardPage() {
           </p>
         </div>
         <button className="flex items-center gap-2 bg-brand-active hover:bg-brand-600 text-white text-sm font-bold px-5 py-3 rounded-xl transition-all shadow-md shrink-0 whitespace-nowrap">
-          <Plus className="w-4 h-4" />
-          Nouvelle Mise à Jour
+          + Nouvelle Mise à Jour
         </button>
       </div>
 
       {/* ─── Stat Cards ───────────────────────────────────────────────── */}
       <div className="grid grid-cols-3 gap-5 mb-7">
         <StatCard
-          icon={<Eye className="w-5 h-5 text-brand-active" />}
+          icon={<span className="text-brand-active text-lg">&#128065;</span>}
           badge={
             <div className="flex items-center gap-1 text-xs font-bold text-emerald-600 bg-emerald-50 border border-emerald-100 px-2.5 py-1 rounded-full">
-              <TrendingUp className="w-3 h-3" />
+              <span>&#8593;</span>
               <span>+12%</span>
             </div>
           }
@@ -272,7 +258,7 @@ export default function DashboardPage() {
           sub="mois-ci"
         />
         <StatCard
-          icon={<Users className="w-5 h-5 text-violet-500" />}
+          icon={<span className="text-violet-500 text-lg">&#128101;</span>}
           badge={
             <span className="text-[10px] font-bold text-slate-400 bg-slate-50 border border-slate-200 px-2.5 py-1 rounded-full">
               Oct - Nov
@@ -283,7 +269,7 @@ export default function DashboardPage() {
           sub="intéressés"
         />
         <StatCard
-          icon={<CheckCircle2 className="w-5 h-5 text-emerald-500" />}
+          icon={<span className="text-emerald-500 text-lg">&#10003;</span>}
           badge={
             <div className="flex items-center gap-1.5 bg-emerald-50 border border-emerald-100 px-2.5 py-1 rounded-full">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
@@ -305,8 +291,7 @@ export default function DashboardPage() {
             Aperçu de vos opportunités
           </h2>
           <button className="text-xs font-bold text-brand-active hover:text-brand-600 flex items-center gap-1 transition-colors">
-            Voir tout
-            <ChevronRight className="w-3.5 h-3.5" />
+            Voir tout &rsaquo;
           </button>
         </div>
 
@@ -420,9 +405,8 @@ export default function DashboardPage() {
             ) : (
               <button
                 onClick={() => setEditingColor(true)}
-                className="text-xs font-bold text-brand-active hover:text-brand-600 transition-colors flex items-center gap-1"
+                className="text-xs font-bold text-brand-active hover:text-brand-600 transition-colors"
               >
-                <Palette className="w-3.5 h-3.5" />
                 Modifier
               </button>
             )}
@@ -469,9 +453,9 @@ export default function DashboardPage() {
           <div className="absolute -top-8 -right-8 w-32 h-32 bg-white/10 rounded-full blur-2xl pointer-events-none" />
           <div className="absolute -bottom-4 -left-4 w-24 h-24 bg-white/5 rounded-full blur-xl pointer-events-none" />
 
-          {/* Rocket icon */}
-          <div className="absolute right-5 bottom-5 opacity-20">
-            <Rocket className="w-20 h-20 text-white" />
+          {/* Rocket decoration */}
+          <div className="absolute right-5 bottom-5 opacity-10 text-7xl select-none pointer-events-none">
+            &#128640;
           </div>
 
           <div className="relative z-10 space-y-2">

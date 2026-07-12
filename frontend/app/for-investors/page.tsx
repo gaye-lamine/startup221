@@ -3,40 +3,26 @@
 import React, { useRef, useState } from "react";
 import Link from "next/link";
 import { API } from "../../lib/api";
-import {
-  ArrowRight,
-  ShieldCheck,
-  Zap,
-  SlidersHorizontal,
-  UserCheck,
-  BarChart3,
-  MessageCircle,
-  CheckCircle2,
-  ChevronRight,
-  Globe,
-  TrendingUp,
-  Building2,
-} from "lucide-react";
 
 // ─── Data ─────────────────────────────────────────────────────────────────────
 
 const VALUE_PROPS = [
   {
-    icon: ShieldCheck,
+    emoji: "\u2714",
     title: "Données vérifiées",
     desc: "Chaque startup est auditée par notre équipe avant publication. Financiers, équipe, traction : tout est validé.",
     color: "text-brand-active",
     bg: "bg-brand-50",
   },
   {
-    icon: Zap,
+    emoji: "\u26a1",
     title: "Contact direct",
     desc: "Accédez directement aux fondateurs, sans intermédiaire ni frais de courtage. Votre message arrive en 24h.",
     color: "text-violet-600",
     bg: "bg-violet-50",
   },
   {
-    icon: SlidersHorizontal,
+    emoji: "\ud83d\udd79",
     title: "Filtres avancés",
     desc: "Filtrez par secteur, stade de financement, taille d'équipe et type de besoin pour un deal-flow ultra-ciblé.",
     color: "text-emerald-600",
@@ -47,29 +33,29 @@ const VALUE_PROPS = [
 const PROCESS_STEPS = [
   {
     num: "01",
-    icon: UserCheck,
+    emoji: "\ud83d\udc64",
     title: "Créez votre compte",
     desc: "Inscription en 2 minutes. Renseignez votre profil investisseur (fonds, tickets, secteurs cibles).",
   },
   {
     num: "02",
-    icon: BarChart3,
+    emoji: "\ud83d\udcca",
     title: "Analysez les profils",
     desc: "Accédez au deal-flow complet avec métriques, pitch deck et historique de financement de chaque startup.",
   },
   {
     num: "03",
-    icon: MessageCircle,
+    emoji: "\ud83d\udcac",
     title: "Prenez contact",
     desc: "Envoyez une demande de mise en relation directement aux fondateurs et commencez vos due diligences.",
   },
 ];
 
 const STATS = [
-  { value: "+150", label: "Startups référencées", icon: Building2 },
-  { value: "12 Mds", label: "FCFA levés via le réseau", icon: TrendingUp },
-  { value: "+50", label: "Investisseurs actifs", icon: UserCheck },
-  { value: "3", label: "Pays couverts", icon: Globe },
+  { value: "+150", label: "Startups référencées", emoji: "\ud83c\udfe2" },
+  { value: "12 Mds", label: "FCFA levés via le réseau", emoji: "\ud83d\udcc8" },
+  { value: "+50", label: "Investisseurs actifs", emoji: "\ud83e\udd1d" },
+  { value: "3", label: "Pays couverts", emoji: "\ud83c\udf0d" },
 ];
 
 const TESTIMONIALS = [
@@ -174,15 +160,13 @@ export default function ForInvestorsPage() {
               onClick={scrollToCTA}
               className="flex items-center gap-2 bg-brand-active hover:bg-brand-600 text-white font-bold px-7 py-4 rounded-xl transition-all shadow-lg shadow-brand-active/20 text-sm"
             >
-              Demander un accès Investisseur
-              <ArrowRight className="w-4 h-4" />
+              Demander un accès Investisseur &rarr;
             </button>
             <Link
               href="/"
               className="flex items-center gap-2 bg-white hover:bg-slate-50 text-slate-700 font-bold px-7 py-4 rounded-xl border border-slate-200 transition-all text-sm"
             >
-              Explorer l'annuaire
-              <ChevronRight className="w-4 h-4 text-slate-400" />
+              Explorer l'annuaire &rsaquo;
             </Link>
           </div>
 
@@ -190,7 +174,7 @@ export default function ForInvestorsPage() {
           <div className="flex flex-wrap items-center justify-center gap-6 mt-14 text-xs font-semibold text-slate-400 uppercase tracking-widest">
             {["Données vérifiées", "Contact sans intermédiaire", "100% gratuit"].map((t) => (
               <span key={t} className="flex items-center gap-2">
-                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />
+                <span className="text-emerald-500">&#10003;</span>
                 {t}
               </span>
             ))}
@@ -201,9 +185,9 @@ export default function ForInvestorsPage() {
       {/* ─── STATS BAR ────────────────────────────────────────────────── */}
       <section className="border-y border-slate-100 bg-white">
         <div className="max-w-6xl mx-auto px-6 py-10 grid grid-cols-2 md:grid-cols-4 divide-x divide-slate-100">
-          {STATS.map(({ value, label, icon: Icon }) => (
+          {STATS.map(({ value, label, emoji }) => (
             <div key={label} className="flex flex-col items-center gap-1 px-6 py-2 text-center">
-              <Icon className="w-4 h-4 text-brand-active mb-1" />
+              <span className="text-lg mb-1">{emoji}</span>
               <span className="text-2xl font-extrabold text-slate-900">{value}</span>
               <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-widest">
                 {label}
@@ -225,13 +209,13 @@ export default function ForInvestorsPage() {
         </div>
 
         <div className="grid md:grid-cols-3 gap-6">
-          {VALUE_PROPS.map(({ icon: Icon, title, desc, color, bg }) => (
+          {VALUE_PROPS.map(({ emoji, title, desc, color, bg }) => (
             <div
               key={title}
               className="bg-white border border-slate-100 rounded-2xl p-7 shadow-[0_4px_24px_rgba(0,0,0,0.04)] hover:shadow-[0_8px_32px_rgba(0,0,0,0.07)] hover:-translate-y-1 transition-all duration-300 group"
             >
               <div className={`w-12 h-12 ${bg} rounded-2xl flex items-center justify-center mb-5`}>
-                <Icon className={`w-6 h-6 ${color}`} />
+                <span className={`text-2xl ${color}`}>{emoji}</span>
               </div>
               <h3 className="text-lg font-extrabold text-slate-900 mb-2">{title}</h3>
               <p className="text-sm text-slate-500 leading-relaxed">{desc}</p>
@@ -255,11 +239,11 @@ export default function ForInvestorsPage() {
             {/* Connector line */}
             <div className="hidden md:block absolute top-8 left-[calc(16.67%+1rem)] right-[calc(16.67%+1rem)] h-[1px] bg-gradient-to-r from-brand-100 via-brand-300 to-brand-100" />
 
-            {PROCESS_STEPS.map(({ num, icon: Icon, title, desc }) => (
+            {PROCESS_STEPS.map(({ num, emoji, title, desc }) => (
               <div key={num} className="relative flex flex-col items-center text-center gap-4">
                 {/* Step bubble */}
                 <div className="relative z-10 w-16 h-16 bg-white border-2 border-brand-100 rounded-2xl flex items-center justify-center shadow-[0_4px_16px_rgba(53,69,230,0.10)]">
-                  <Icon className="w-7 h-7 text-brand-active" />
+                  <span className="text-2xl">{emoji}</span>
                   <span className="absolute -top-2.5 -right-2.5 w-6 h-6 bg-brand-active text-white text-[10px] font-extrabold rounded-full flex items-center justify-center shadow">
                     {num.slice(1)}
                   </span>
@@ -361,14 +345,14 @@ export default function ForInvestorsPage() {
                       Envoi...
                     </>
                   ) : (
-                    <>Commencer <ArrowRight className="w-4 h-4" /></>
+                    <>Commencer &rarr;</>
                   )}
                 </button>
               </div>
 
               {error && (
                 <p className="mt-3 text-sm text-amber-300 font-medium flex items-center gap-1.5 justify-center">
-                  <CheckCircle2 className="w-4 h-4" />
+                  <span>&#9888;</span>
                   {error}
                 </p>
               )}
@@ -380,8 +364,8 @@ export default function ForInvestorsPage() {
           ) : (
             /* Success state */
             <div className="bg-white/10 border border-white/20 backdrop-blur-sm rounded-2xl p-8 max-w-md mx-auto">
-              <div className="w-14 h-14 bg-emerald-500/20 border border-emerald-400/30 rounded-full flex items-center justify-center mx-auto mb-4">
-                <CheckCircle2 className="w-7 h-7 text-emerald-400" />
+              <div className="w-14 h-14 bg-emerald-500/20 border border-emerald-400/30 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl">
+                &#10003;
               </div>
               <h3 className="text-xl font-extrabold text-white mb-2">
                 Vous êtes sur la liste ! 🎉
@@ -391,7 +375,7 @@ export default function ForInvestorsPage() {
                 <strong className="text-white">48h</strong> avec vos identifiants.
               </p>
               <div className="mt-5 pt-5 border-t border-white/10 flex items-center justify-center gap-2 text-xs text-white/50">
-                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+                <span className="text-emerald-400">&#10003;</span>
                 Confirmation envoyée à <strong className="text-white/70">{email}</strong>
               </div>
             </div>
