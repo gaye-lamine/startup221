@@ -69,7 +69,7 @@ export default function DirectoryPage() {
       let minEmp: number | null = null;
       let maxEmp: number | null = null;
       if (selectedSizes.length > 0) {
-        selectedSizes.forEach((size) => {
+        for (const size of selectedSizes) {
           if (size === "1-10") {
             if (minEmp === null || minEmp > 1) minEmp = 1;
             if (maxEmp === null || maxEmp < 10) maxEmp = 10;
@@ -80,7 +80,7 @@ export default function DirectoryPage() {
             if (minEmp === null || minEmp > 51) minEmp = 51;
             // No upper limit set for maxEmp
           }
-        });
+        }
       }
 
       if (minEmp !== null) params.append("min_employees", minEmp.toString());
