@@ -63,6 +63,7 @@ export default function EditProfilePage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!slug) return;
     setSubmitting(true);
     setMessage(null);
 
