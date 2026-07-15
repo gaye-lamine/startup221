@@ -5,9 +5,9 @@ import Footer from "../components/Footer";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Startup221 | Découvrez et investissez dans la Tech au Sénégal",
+  title: "StartupSN | Le point de rencontre de la Tech sénégalaise",
   description:
-    "La plateforme centrale connectant les startups les plus innovantes du Sénégal avec les investisseurs et partenaires stratégiques.",
+    "StartupSN recense, connecte et valorise les startups les plus prometteuses du Sénégal. Un seul endroit pour découvrir l'écosystème, lever des fonds, recruter et nouer des partenariats.",
 };
 
 export default function RootLayout({
@@ -23,7 +23,7 @@ export default function RootLayout({
           rel="stylesheet"
         />
       </head>
-      <body className="flex flex-col min-h-screen bg-[#FAFAFC]">
+      <body className="flex flex-col min-h-screen bg-[#F7F3E8]">
         <Header />
         <main className="flex-grow">{children}</main>
         <Footer />

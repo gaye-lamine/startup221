@@ -34,7 +34,7 @@ export default function Hero({
   };
 
   return (
-    <section className="relative overflow-hidden bg-gradient-to-b from-[#EFF2FF]/40 via-white to-transparent pt-16 pb-12 text-center">
+    <section className="relative overflow-hidden bg-gradient-to-b from-brand-50/40 via-white to-transparent pt-16 pb-12 text-center">
       <div className="max-w-4xl mx-auto px-4">
         {/* Title */}
         <h1 className="text-4xl md:text-5xl font-extrabold text-slate-900 tracking-tight leading-[1.15] mb-4">

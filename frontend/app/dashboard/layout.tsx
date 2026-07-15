@@ -19,16 +19,16 @@ export default function DashboardLayout({
   const pathname = usePathname();
 
   return (
-    <div className="min-h-screen bg-[#F4F6FF] flex">
+    <div className="min-h-screen bg-[#F7F3E8] flex">
       {/* ─── Fixed Sidebar ─────────────────────────────────────────── */}
-      <aside className="w-[200px] shrink-0 bg-white border-r border-slate-100 flex flex-col fixed top-0 left-0 h-full z-40 shadow-[2px_0_16px_rgba(0,0,0,0.03)]">
+      <aside className="w-[200px] shrink-0 bg-white border-r border-slate-200 flex flex-col fixed top-0 left-0 h-full z-40 shadow-[2px_0_16px_rgba(0,0,0,0.02)]">
         {/* Brand */}
         <div className="px-5 pt-6 pb-5">
           <Link
             href="/"
-            className="text-xl font-extrabold text-brand-active tracking-tight"
+            className="flex items-center gap-2"
           >
-            Startup221
+            <img src="/logo-principal.svg" alt="StartupSN Logo" className="h-6 w-auto" />
           </Link>
         </div>
 

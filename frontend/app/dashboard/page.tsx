@@ -17,7 +17,7 @@ interface Lead {
 
 const PALETTE_PRESETS = [
   { label: "Indigo", hex: "#4f46e5" },
-  { label: "Bleu", hex: "#3545E6" },
+  { label: "Vert SN", hex: "#0C8A4D" },
   { label: "Violet", hex: "#7c3aed" },
   { label: "Émeraude", hex: "#059669" },
   { label: "Rose", hex: "#e11d48" },
@@ -492,7 +492,7 @@ export default function DashboardPage() {
         {/* Fundraising Banner */}
         <div
           className="rounded-2xl p-6 flex flex-col justify-between relative overflow-hidden min-h-[220px]"
-          style={{ backgroundColor: "#3545E6" }}
+          style={{ backgroundColor: "#0E3A2C" }}
         >
           {/* Glow blobs */}
           <div className="absolute -top-8 -right-8 w-32 h-32 bg-white/10 rounded-full blur-2xl pointer-events-none" />

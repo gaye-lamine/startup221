@@ -46,7 +46,7 @@ const MOCK_PROFILES: Record<string, Partial<Startup> & {
     seeking: ["Investisseurs", "Partenaires"],
     founding_date: "Octobre 2022",
     city: "Dakar, Sénégal",
-    primary_color: "#3545E6",
+    primary_color: "#0C8A4D",
     funding_stage: "Amorçage / Seed",
     website_url: "www.senpay.sn",
     twitter_url: "https://twitter.com/senpay",
@@ -215,7 +215,7 @@ export default function StartupDetailPage() {
     );
   }
 
-  const primaryColor = startup.primary_color || "#3545E6";
+  const primaryColor = startup.primary_color || "#0C8A4D";
 
   return (
     <div className="relative pb-20">
