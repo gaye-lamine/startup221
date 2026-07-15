@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
+import { API } from "../lib/api";
 
 export default function Header() {
   const router = useRouter();
