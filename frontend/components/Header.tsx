@@ -70,8 +70,8 @@ export default function Header() {
         
         {/* Left Side */}
         <div className="flex items-center gap-10">
-          <Link href="/" className="text-2xl font-bold text-brand-active tracking-tight flex items-center gap-1">
-            <span>Startup221</span>
+          <Link href="/" className="flex items-center gap-2">
+            <img src="/logo-principal.svg" alt="StartupSN Logo" className="h-8 w-auto" />
           </Link>
           
           <nav className="hidden md:flex items-center gap-8 h-16">

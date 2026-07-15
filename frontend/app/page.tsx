@@ -130,16 +130,15 @@ export default function DirectoryPage() {
   return (
     <div className="pb-20 bg-slate-50/50 min-h-screen">
       {/* ─── HERO SECTION ────────────────────────────────────────────── */}
-      <section className="relative overflow-hidden bg-gradient-to-b from-[#EFF2FF]/40 via-white to-transparent pt-16 pb-12 text-center border-b border-slate-100">
+      <section className="relative overflow-hidden bg-gradient-to-b from-brand-50/40 via-white to-transparent pt-16 pb-12 text-center border-b border-slate-200/60">
         <div className="max-w-4xl mx-auto px-4">
           <h1 className="text-4xl md:text-5xl font-extrabold text-slate-900 tracking-tight leading-[1.15] mb-4">
-            Découvrez et investissez dans la <br />
-            <span className="text-brand-active">Tech au Sénégal</span>
+            Le point de rencontre de la <br />
+            <span className="text-brand-active">Tech sénégalaise</span>
           </h1>
 
           <p className="text-base text-slate-500 max-w-2xl mx-auto mb-8 leading-relaxed font-medium">
-            La plateforme centrale connectant les startups les plus innovantes du
-            Sénégal avec les investisseurs et partenaires stratégiques du monde entier.
+            StartupSN recense, connecte et valorise les startups les plus prometteuses du Sénégal. Un seul endroit pour découvrir l'écosystème, lever des fonds, recruter et nouer des partenariats.
           </p>
 
           {/* Search bar wrapper */}

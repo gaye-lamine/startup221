@@ -10,18 +10,21 @@ const config: Config = {
     extend: {
       colors: {
         brand: {
-          50: "#eff2fe",
-          100: "#e0e6fc",
-          200: "#c7d2fa",
-          300: "#a5b4f7",
-          400: "#8193f3",
-          500: "#5a6eef",
-          600: "#3d4de5",
-          700: "#313ccf",
-          800: "#2b33a8",
-          900: "#272e86",
-          active: "#3545E6", // Exact blue color from mockup button
-          light: "#E1E6FF",  // Background for "Voir le profil"
+          50: "#E6F4EA",     // Super light green
+          100: "#CEEAD6",    // Light green
+          200: "#81C995",
+          300: "#58A55C",
+          400: "#34A853",
+          500: "#0C8A4D",    // Vivid Green ("SN")
+          600: "#0A7541",
+          700: "#086136",
+          800: "#064D2B",
+          950: "#0E3A2C",    // Forest Ink
+          active: "#0C8A4D", // Vivid Green ("SN")
+          dark: "#0E3A2C",   // Forest Ink
+          gold: "#F2B705",   // Gold Accent
+          paper: "#F7F3E8",  // Light Paper background
+          light: "#EAF6EF",  // Soft light green button / background
         },
         accent: {
           fintech: {

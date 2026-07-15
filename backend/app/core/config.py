@@ -8,7 +8,7 @@ class Settings(BaseSettings):
         env_file=".env", env_file_encoding="utf-8", case_sensitive=True
     )
 
-    APP_NAME: str = "Startup221 API"
+    APP_NAME: str = "StartupSN API"
     APP_ENV: str = "development"
     
     # CORS Origins
