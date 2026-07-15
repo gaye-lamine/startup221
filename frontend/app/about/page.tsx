@@ -35,7 +35,7 @@ export default function AboutPage() {
               className="w-full sm:w-auto bg-white hover:bg-slate-50 text-slate-700 font-bold px-8 py-4 rounded-xl border border-slate-200 transition-all text-sm text-center"
             >
               Accès Investisseurs &rsaquo;
-            </LinkNext>
+            </Link>
           </div>
         </div>
       </section>
