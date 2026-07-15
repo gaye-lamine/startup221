@@ -22,7 +22,7 @@ export default function RegisterPage() {
 
   // Media States
   const [logoUrl, setLogoUrl] = useState("https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=100&auto=format&fit=crop");
-  const [primaryColor, setPrimaryColor] = useState("#3545E6");
+  const [primaryColor, setPrimaryColor] = useState("#0C8A4D");
 
   // Goals & Links States
   const [needs, setNeeds] = useState<string[]>([]);

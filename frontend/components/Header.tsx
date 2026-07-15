@@ -83,12 +83,14 @@ export default function Header() {
             >
               Directory
             </Link>
-            <button
-              onClick={() => alert("À propos : Startup221 connecte l'écosystème tech sénégalais avec les investisseurs mondiaux.")}
-              className="text-sm font-medium text-slate-500 hover:text-slate-900 transition-colors h-full flex items-center px-1 border-b-2 border-transparent"
+            <Link
+              href="/about"
+              className={`text-sm font-semibold h-full flex items-center px-1 border-b-2 transition-all ${
+                pathname === "/about" ? "text-brand-active border-brand-active" : "text-slate-500 hover:text-slate-900 border-transparent"
+              }`}
             >
               About
-            </button>
+            </Link>
 
             {/* Conditionally render For Investors or Dashboard depending on login state */}
             {!isLoggedIn ? (
