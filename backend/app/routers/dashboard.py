@@ -45,6 +45,8 @@ class ProfileUpdate(BaseModel):
     website_url: Optional[str] = None
     linkedin_url: Optional[str] = None
     twitter_url: Optional[str] = None
+    logo_url: Optional[str] = None
+    employee_count: Optional[int] = None
     problem_statement: Optional[str] = None
     solution_statement: Optional[str] = None
 

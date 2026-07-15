@@ -110,7 +110,7 @@ export default function StartupCard({ startup }: StartupCardProps) {
 
         {/* CTA Button */}
         <Link href={`/startup/${startup.slug}`} className="block w-full">
-          <button className="w-full bg-[#E1E6FF] hover:bg-brand-active hover:text-white text-brand-active font-bold py-2.5 rounded-xl text-sm transition-all duration-200">
+          <button className="w-full bg-brand-light hover:bg-brand-active hover:text-white text-brand-active font-bold py-2.5 rounded-xl text-sm transition-all duration-200">
             Voir le profil
           </button>
         </Link>

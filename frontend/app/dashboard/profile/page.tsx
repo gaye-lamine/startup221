@@ -19,6 +19,8 @@ export default function EditProfilePage() {
     website_url: "",
     linkedin_url: "",
     twitter_url: "",
+    logo_url: "",
+    employee_count: 1,
     problem_statement: "",
     solution_statement: "",
   });
@@ -48,6 +50,8 @@ export default function EditProfilePage() {
             website_url: data.website_url || "",
             linkedin_url: data.linkedin_url || "",
             twitter_url: data.twitter_url || "",
+            logo_url: data.logo_url || "",
+            employee_count: data.employee_count || 1,
             problem_statement: data.problem_statement || "",
             solution_statement: data.solution_statement || "",
           });
@@ -114,8 +118,31 @@ export default function EditProfilePage() {
       )}
 
       <form onSubmit={handleSubmit} className="bg-white border border-slate-100 rounded-2xl p-6 shadow-sm space-y-6">
-        {/* Ligne 1 : Nom et Étape */}
-        <div className="grid grid-cols-2 gap-4">
+        {/* Section Logo */}
+        <div className="border-b border-slate-100 pb-6 mb-6">
+          <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">
+            Logo de la Startup (URL)
+          </label>
+          <div className="flex gap-4 items-center">
+            <div className="w-16 h-16 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-center p-2 overflow-hidden shrink-0">
+              {form.logo_url && form.logo_url.startsWith("http") ? (
+                <img src={form.logo_url} alt="Aperçu logo" className="w-full h-full object-contain" />
+              ) : (
+                <span className="text-slate-300 text-2xl font-bold">Logo</span>
+              )}
+            </div>
+            <input
+              type="text"
+              placeholder="https://exemple.com/mon-logo.png"
+              value={form.logo_url}
+              onChange={(e) => setForm({ ...form, logo_url: e.target.value })}
+              className="flex-grow border border-slate-200 px-4 py-2.5 rounded-xl text-sm outline-none focus:border-brand-active focus:ring-2 focus:ring-brand-50"
+            />
+          </div>
+        </div>
+
+        {/* Ligne 1 : Nom, Étape et Effectifs */}
+        <div className="grid grid-cols-3 gap-4">
           <div>
             <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">
               Nom de la startup
@@ -130,12 +157,25 @@ export default function EditProfilePage() {
           </div>
           <div>
             <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">
-              Stade de financement
+              Stade financement
             </label>
             <input
               type="text"
               value={form.funding_stage}
               onChange={(e) => setForm({ ...form, funding_stage: e.target.value })}
+              className="w-full border border-slate-200 px-4 py-2.5 rounded-xl text-sm outline-none focus:border-brand-active focus:ring-2 focus:ring-brand-50"
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">
+              Collaborateurs
+            </label>
+            <input
+              type="number"
+              required
+              min={1}
+              value={form.employee_count}
+              onChange={(e) => setForm({ ...form, employee_count: Number(e.target.value) })}
               className="w-full border border-slate-200 px-4 py-2.5 rounded-xl text-sm outline-none focus:border-brand-active focus:ring-2 focus:ring-brand-50"
             />
           </div>
