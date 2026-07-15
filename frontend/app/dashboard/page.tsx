@@ -211,6 +211,7 @@ export default function DashboardPage() {
   };
 
   const handleColorSave = async () => {
+    if (!slug) return;
     setEditingColor(false);
 
     try {
