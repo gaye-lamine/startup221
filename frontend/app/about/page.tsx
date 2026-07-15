@@ -1,8 +1,7 @@
 "use client";
 
 import React from "react";
-import Link from "next/view-transitions" // Or standard Link from next/link
-import LinkNext from "next/link";
+import Link from "next/link";
 
 export default function AboutPage() {
   return (
@@ -25,13 +24,13 @@ export default function AboutPage() {
           </p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <LinkNext
+            <Link
               href="/"
               className="w-full sm:w-auto bg-brand-active hover:bg-brand-600 text-white font-bold px-8 py-4 rounded-xl transition-all shadow-lg shadow-brand-active/20 text-sm text-center"
             >
               Explorer l'annuaire &rarr;
-            </LinkNext>
-            <LinkNext
+            </Link>
+            <Link
               href="/for-investors"
               className="w-full sm:w-auto bg-white hover:bg-slate-50 text-slate-700 font-bold px-8 py-4 rounded-xl border border-slate-200 transition-all text-sm text-center"
             >
@@ -209,18 +208,18 @@ export default function AboutPage() {
           </p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <LinkNext
+            <Link
               href="/register"
               className="w-full sm:w-auto bg-brand-gold hover:bg-yellow-500 text-brand-dark font-bold px-8 py-4 rounded-xl transition-all shadow-md text-sm text-center"
             >
               Inscrire ma Startup &rarr;
-            </LinkNext>
-            <LinkNext
+            </Link>
+            <Link
               href="/"
               className="w-full sm:w-auto bg-white/10 hover:bg-white/20 text-white font-bold px-8 py-4 rounded-xl border border-white/20 transition-all text-sm text-center"
             >
               Parcourir l'annuaire &rsaquo;
-            </LinkNext>
+            </Link>
           </div>
         </div>
       </section>
