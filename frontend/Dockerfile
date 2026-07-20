@@ -3,7 +3,7 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm install
 COPY . .
-ENV NEXT_PUBLIC_API_URL=http://72.60.213.116:8001
+ENV NEXT_PUBLIC_API_URL=http://72.60.213.116:8088
 RUN npm run build
 
 FROM node:18-alpine AS runner

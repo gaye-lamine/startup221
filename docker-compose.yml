@@ -8,7 +8,7 @@ services:
     container_name: startup221_backend
     restart: always
     ports:
-      - "8001:8000"
+      - "8088:8000"
     environment:
       - APP_NAME=StartupSN API
       - ENVIRONMENT=production
@@ -20,6 +20,6 @@ services:
     container_name: startup221_frontend
     restart: always
     ports:
-      - "3001:3000"
+      - "3008:3000"
     environment:
-      - NEXT_PUBLIC_API_URL=http://72.60.213.116:8001
+      - NEXT_PUBLIC_API_URL=http://72.60.213.116:8088
