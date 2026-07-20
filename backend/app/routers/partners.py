@@ -207,3 +207,75 @@ async def list_resources(
         resources = list(result.scalars().all())
 
     return resources
+
+# CRUD API Extensions for Dynamic Management
+
+@router.post("/partners", response_model=PartnerRead)
+async def create_partner(
+    partner_data: PartnerCreate,
+    session: AsyncSession = Depends(get_session),
+):
+    new_partner = Partner(**partner_data.model_dump())
+    session.add(new_partner)
+    await session.commit()
+    await session.refresh(new_partner)
+    return new_partner
+
+@router.delete("/partners/{partner_id}")
+async def delete_partner(
+    partner_id: str,
+    session: AsyncSession = Depends(get_session),
+):
+    partner = await session.get(Partner, partner_id)
+    if not partner:
+        raise HTTPException(status_code=404, detail="Partner not found")
+    await session.delete(partner)
+    await session.commit()
+    return {"message": "Partner deleted successfully"}
+
+@router.post("/programs", response_model=ProgramRead)
+async def create_program(
+    program_data: ProgramCreate,
+    session: AsyncSession = Depends(get_session),
+):
+    new_program = OpportunityProgram(**program_data.model_dump())
+    session.add(new_program)
+    await session.commit()
+    await session.refresh(new_program)
+    return new_program
+
+@router.delete("/programs/{program_id}")
+async def delete_program(
+    program_id: str,
+    session: AsyncSession = Depends(get_session),
+):
+    program = await session.get(OpportunityProgram, program_id)
+    if not program:
+        raise HTTPException(status_code=404, detail="Program not found")
+    await session.delete(program)
+    await session.commit()
+    return {"message": "Program deleted successfully"}
+
+@router.post("/resources", response_model=ResourceRead)
+async def create_resource(
+    resource_data: ResourceCreate,
+    session: AsyncSession = Depends(get_session),
+):
+    new_resource = Resource(**resource_data.model_dump())
+    session.add(new_resource)
+    await session.commit()
+    await session.refresh(new_resource)
+    return new_resource
+
+@router.delete("/resources/{resource_id}")
+async def delete_resource(
+    resource_id: str,
+    session: AsyncSession = Depends(get_session),
+):
+    resource = await session.get(Resource, resource_id)
+    if not resource:
+        raise HTTPException(status_code=404, detail="Resource not found")
+    await session.delete(resource)
+    await session.commit()
+    return {"message": "Resource deleted successfully"}
+

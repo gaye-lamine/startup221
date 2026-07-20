@@ -111,3 +111,27 @@ async def get_investor_by_slug(
     if not investor:
         raise HTTPException(status_code=404, detail="Investisseur introuvable")
     return investor
+
+@router.post("/directory", response_model=InvestorRead)
+async def create_investor(
+    investor_data: InvestorCreate,
+    session: AsyncSession = Depends(get_session),
+):
+    new_investor = Investor(**investor_data.model_dump())
+    session.add(new_investor)
+    await session.commit()
+    await session.refresh(new_investor)
+    return new_investor
+
+@router.delete("/directory/{investor_id}")
+async def delete_investor(
+    investor_id: str,
+    session: AsyncSession = Depends(get_session),
+):
+    investor = await session.get(Investor, investor_id)
+    if not investor:
+        raise HTTPException(status_code=404, detail="Investisseur non trouvé")
+    await session.delete(investor)
+    await session.commit()
+    return {"message": "Investisseur supprimé avec succès"}
+
