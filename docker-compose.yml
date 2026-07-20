@@ -12,14 +12,3 @@ services:
     environment:
       - APP_NAME=StartupSN API
       - ENVIRONMENT=production
-
-  startup221_frontend:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
-    container_name: startup221_frontend
-    restart: always
-    ports:
-      - "3008:3000"
-    environment:
-      - NEXT_PUBLIC_API_URL=http://72.60.213.116:8088
