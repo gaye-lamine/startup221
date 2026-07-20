@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
 import { API } from "../lib/api";
+import { ShieldCheck, LogOut, UserCheck, Lock } from "lucide-react";
 
 export default function Header() {
   const router = useRouter();
@@ -14,17 +15,27 @@ export default function Header() {
   const [loginError, setLoginError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
-  // Simulated logged-in state using localStorage for cross-page persistence
+  // States for user roles
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [startupName, setStartupName] = useState("");
+  const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
-    const session = localStorage.getItem("startup_session");
-    if (session === "true") {
+    checkAuthStatus();
+  }, [pathname]);
+
+  const checkAuthStatus = () => {
+    const adminSession = localStorage.getItem("admin_session") === "true";
+    const startupSession = localStorage.getItem("startup_session") === "true";
+
+    setIsAdmin(adminSession);
+    if (startupSession) {
       setIsLoggedIn(true);
       setStartupName(localStorage.getItem("startup_name") || "Ma Startup");
+    } else {
+      setIsLoggedIn(false);
     }
-  }, []);
+  };
 
   const handleLoginSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -49,7 +60,6 @@ export default function Header() {
         
         setShowLoginModal(false);
         router.push("/dashboard");
-        window.location.reload(); // Force refresh to re-evaluate the header
       } else {
         const data = await res.json();
         setLoginError(data.detail || "Identifiants invalides.");
@@ -63,10 +73,12 @@ export default function Header() {
 
   const handleLogout = () => {
     setIsLoggedIn(false);
+    setIsAdmin(false);
     localStorage.removeItem("startup_session");
     localStorage.removeItem("startup_slug");
     localStorage.removeItem("startup_name");
     localStorage.removeItem("startup_token");
+    localStorage.removeItem("admin_session");
     router.push("/");
   };
 
@@ -121,7 +133,17 @@ export default function Header() {
             >
               Ressources
             </Link>
-            {isLoggedIn && (
+
+            {/* Dynamic Dashboard/Admin Link */}
+            {isAdmin && (
+              <Link
+                href="/admin"
+                className={`text-xs font-extrabold h-full flex items-center px-1 border-b-2 transition-all text-amber-600 border-amber-500`}
+              >
+                Console Admin
+              </Link>
+            )}
+            {isLoggedIn && !isAdmin && (
               <Link
                 href="/dashboard"
                 className={`text-xs font-bold h-full flex items-center px-1 border-b-2 transition-all ${
@@ -135,23 +157,26 @@ export default function Header() {
         </div>
 
         {/* Right Side */}
-        <div className="flex items-center gap-6">
-          {!isLoggedIn ? (
-            <>
-              <button
-                onClick={() => setShowLoginModal(true)}
-                className="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors"
-              >
-                Se connecter
-              </button>
+        <div className="flex items-center gap-4">
+          {isAdmin ? (
+            /* Admin Logged-In State */
+            <div className="flex items-center gap-3">
               <Link
-                href="/register"
-                className="text-sm font-medium bg-brand-active text-white px-5 py-2.5 rounded-lg hover:bg-brand-600 transition-colors shadow-sm"
+                href="/admin"
+                className="inline-flex items-center gap-1.5 text-xs font-extrabold bg-amber-50 text-amber-700 border border-amber-200 px-3 py-1.5 rounded-lg shadow-sm"
               >
-                Inscrire ma Startup
+                <ShieldCheck className="w-4 h-4 text-amber-600" />
+                <span>Session Administrateur</span>
               </Link>
-            </>
-          ) : (
+              <button
+                onClick={handleLogout}
+                className="text-xs font-bold text-slate-500 hover:text-slate-800 bg-slate-100 hover:bg-slate-200 px-3 py-1.5 rounded-lg transition-all"
+              >
+                Déconnexion
+              </button>
+            </div>
+          ) : isLoggedIn ? (
+            /* Founder Logged-In State */
             <div className="flex items-center gap-4">
               <Link
                 href="/dashboard"
@@ -162,11 +187,27 @@ export default function Header() {
               </Link>
               <button
                 onClick={handleLogout}
-                className="text-sm font-semibold text-rose-600 hover:text-rose-700 transition-colors bg-rose-50 border border-rose-100 hover:bg-rose-100/50 px-3 py-1.5 rounded-lg text-xs uppercase tracking-wider"
+                className="text-xs font-semibold text-rose-600 hover:text-rose-700 transition-colors bg-rose-50 border border-rose-100 hover:bg-rose-100/50 px-3 py-1.5 rounded-lg uppercase tracking-wider"
               >
                 Déconnexion
               </button>
             </div>
+          ) : (
+            /* Public Anonymous Visitor State */
+            <>
+              <button
+                onClick={() => setShowLoginModal(true)}
+                className="text-xs sm:text-sm font-bold text-slate-600 hover:text-slate-900 transition-colors px-3 py-2"
+              >
+                Se connecter
+              </button>
+              <Link
+                href="/register"
+                className="text-xs sm:text-sm font-bold bg-brand-active text-white px-4 sm:px-5 py-2.5 rounded-lg hover:bg-brand-600 transition-colors shadow-sm"
+              >
+                Inscrire ma Startup
+              </Link>
+            </>
           )}
         </div>
       </div>
