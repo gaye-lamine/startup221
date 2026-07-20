@@ -1,5 +1,6 @@
 import uuid
 from datetime import datetime
+from typing import Optional
 from sqlmodel import SQLModel, Field
 from sqlalchemy import Column, ForeignKey
 from sqlalchemy.sql import func
@@ -25,6 +26,8 @@ class Lead(SQLModel, table=True):
     sender_entity: str
     sender_email: str
     message_type: str  # Investissement, Partenariat, etc.
+    replied: bool = Field(default=False)
+    reply_message: Optional[str] = Field(default=None, nullable=True)
     created_at: datetime = Field(
         default_factory=datetime.utcnow,
         sa_column_kwargs={"server_default": func.now()},

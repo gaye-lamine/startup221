@@ -1,7 +1,6 @@
 import React from "react";
 import type { Metadata } from "next";
-import Header from "../components/Header";
-import Footer from "../components/Footer";
+import ConditionalLayout from "../components/ConditionalLayout";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -23,10 +22,8 @@ export default function RootLayout({
           rel="stylesheet"
         />
       </head>
-      <body className="flex flex-col min-h-screen bg-[#F7F3E8]">
-        <Header />
-        <main className="flex-grow">{children}</main>
-        <Footer />
+      <body className="bg-[#F7F3E8]">
+        <ConditionalLayout>{children}</ConditionalLayout>
       </body>
     </html>
   );

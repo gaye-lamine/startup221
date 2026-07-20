@@ -16,27 +16,10 @@ import redis.asyncio as aioredis
 from app.core.config import settings
 # Import the existing single definition of Startup to prevent SQLAlchemy double-registration errors
 from app.entities.startup import Startup
+from app.entities.team_member import TeamMember
+from app.entities.startup_need import StartupNeed
 
-# ---------------------------------------------------------------------------
-# Redis Client Wrapper
-# ---------------------------------------------------------------------------
-class RedisClient:
-    def __init__(self):
-        self.client: Optional[aioredis.Redis] = None
-
-    async def connect(self):
-        try:
-            self.client = aioredis.from_url(settings.REDIS_URL, decode_responses=True)
-            await self.client.ping()
-        except Exception as e:
-            print(f"Failed to connect to Redis: {e}")
-            self.client = None
-
-    async def disconnect(self):
-        if self.client:
-            await self.client.close()
-
-redis_client = RedisClient()
+from app.core.redis import redis_client
 
 # ---------------------------------------------------------------------------
 # Database Engine and Sessions
@@ -112,7 +95,7 @@ app.add_middleware(
         "http://localhost:3001",
         "http://127.0.0.1:3000",
         "http://127.0.0.1:3001",
-        "https://startup221.netlify.app",
+        "https://startupsn.netlify.app",
     ],
     allow_credentials=True,
     allow_methods=["*"],
@@ -255,6 +238,24 @@ except ImportError:
 try:
     from app.routers import auth as auth_router
     app.include_router(auth_router.router, prefix="/api/v1")
+except ImportError:
+    pass
+
+try:
+    from app.routers import admin as admin_router
+    app.include_router(admin_router.router, prefix="/api/v1")
+except ImportError:
+    pass
+
+try:
+    from app.routers import investors_directory as investors_dir_router
+    app.include_router(investors_dir_router.router, prefix="/api/v1")
+except ImportError:
+    pass
+
+try:
+    from app.routers import partners as partners_router
+    app.include_router(partners_router.router, prefix="/api/v1")
 except ImportError:
     pass
 

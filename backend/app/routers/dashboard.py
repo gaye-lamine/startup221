@@ -7,8 +7,11 @@ from sqlmodel import select, func, col
 from sqlmodel.ext.asyncio.session import AsyncSession
 from app.core.database import get_session
 from app.core.redis import redis_client
+from app.core.security import get_current_startup
 from app.entities.startup import Startup
 from app.entities.lead import Lead
+from app.entities.team_member import TeamMember
+from app.entities.startup_need import StartupNeed
 from app.repositories.cache_repository import CacheRepository
 
 router = APIRouter(prefix="/dashboard", tags=["Dashboard"])
@@ -30,10 +33,54 @@ class LeadOut(BaseModel):
     sender_entity: str
     sender_email: str
     message_type: str
+    replied: bool
+    reply_message: Optional[str]
     created_at: datetime
 
     class Config:
         from_attributes = True
+
+
+class TeamMemberCreate(BaseModel):
+    name: str = Field(..., min_length=1)
+    role: str = Field(..., min_length=1)
+    avatar_url: Optional[str] = ""
+    linkedin_url: Optional[str] = ""
+
+
+class TeamMemberOut(BaseModel):
+    id: uuid.UUID
+    startup_id: uuid.UUID
+    name: str
+    role: str
+    avatar_url: str
+    linkedin_url: str
+
+    class Config:
+        from_attributes = True
+
+
+class StartupNeedCreate(BaseModel):
+    category: str = Field(..., min_length=1)  # Investissement, Partenariat, Recrutement
+    need_type: str = Field(default="Besoin")
+    title: str = Field(..., min_length=1)
+    description: str = Field(..., min_length=1)
+
+
+class StartupNeedOut(BaseModel):
+    id: uuid.UUID
+    startup_id: uuid.UUID
+    category: str
+    need_type: str
+    title: str
+    description: str
+
+    class Config:
+        from_attributes = True
+
+
+class LeadReplyRequest(BaseModel):
+    message: str = Field(..., min_length=1)
 
 
 class ProfileUpdate(BaseModel):
@@ -49,6 +96,8 @@ class ProfileUpdate(BaseModel):
     employee_count: Optional[int] = None
     problem_statement: Optional[str] = None
     solution_statement: Optional[str] = None
+    funding_amount: Optional[str] = None
+    pitch_deck_url: Optional[str] = None
 
 
 class StartupOut(BaseModel):
@@ -68,6 +117,8 @@ class StartupOut(BaseModel):
     twitter_url: str
     problem_statement: str
     solution_statement: str
+    funding_amount: Optional[str] = None
+    pitch_deck_url: Optional[str] = None
     created_at: datetime
 
     class Config:
@@ -95,7 +146,10 @@ async def _get_startup_or_404(slug: str, session: AsyncSession) -> Startup:
 async def get_dashboard_stats(
     slug: str,
     session: AsyncSession = Depends(get_session),
+    current_startup: dict = Depends(get_current_startup),
 ):
+    if current_startup["slug"] != slug:
+        raise HTTPException(status_code=403, detail="Accès non autorisé à ce tableau de bord.")
     """
     Returns key dashboard indicators for a given startup:
     - Simulated profile views (random counter based on slug hash)
@@ -112,12 +166,8 @@ async def get_dashboard_stats(
     )
     contact_count = count_result.scalar_one_or_none() or 0
 
-    # Simulate profile views (deterministic from slug so it doesn't change on refresh)
-    # In production, this would come from an analytics table or Redis counter
-    simulated_views = (abs(hash(slug)) % 500) + 100
-
     return DashboardStats(
-        profile_views=simulated_views,
+        profile_views=startup.profile_views,
         contact_requests=contact_count,
         is_live=True,
     )
@@ -127,7 +177,10 @@ async def get_dashboard_stats(
 async def get_dashboard_leads(
     slug: str,
     session: AsyncSession = Depends(get_session),
+    current_startup: dict = Depends(get_current_startup),
 ):
+    if current_startup["slug"] != slug:
+        raise HTTPException(status_code=403, detail="Accès non autorisé à ce tableau de bord.")
     """
     Returns all investor contact leads for this startup,
     sorted by creation date descending (most recent first).
@@ -148,7 +201,10 @@ async def update_startup_profile(
     slug: str,
     payload: ProfileUpdate,
     session: AsyncSession = Depends(get_session),
+    current_startup: dict = Depends(get_current_startup),
 ):
+    if current_startup["slug"] != slug:
+        raise HTTPException(status_code=403, detail="Accès non autorisé à ce tableau de bord.")
     """
     Updates editable startup profile fields.
     CRUCIAL: Invalidates the Redis cache key `startup:profile:{slug}` after
@@ -174,3 +230,168 @@ async def update_startup_profile(
         pass  # Cache miss is acceptable; DB is source of truth
 
     return startup
+
+
+@router.post("/leads/{slug}/reply/{lead_id}", response_model=LeadOut)
+async def reply_to_lead(
+    slug: str,
+    lead_id: uuid.UUID,
+    payload: LeadReplyRequest,
+    session: AsyncSession = Depends(get_session),
+    current_startup: dict = Depends(get_current_startup),
+):
+    if current_startup["slug"] != slug:
+        raise HTTPException(status_code=403, detail="Accès non autorisé à ce tableau de bord.")
+    """
+    Stores the founder's reply message against a lead and marks it as replied.
+    This creates a persistent record of the communication, even without email sending.
+    """
+    startup = await _get_startup_or_404(slug, session)
+
+    result = await session.execute(
+        select(Lead).where(
+            col(Lead.id) == lead_id,
+            col(Lead.startup_id) == startup.id,
+        )
+    )
+    lead = result.scalar_one_or_none()
+    if not lead:
+        raise HTTPException(status_code=404, detail="Lead introuvable.")
+
+    lead.replied = True
+    lead.reply_message = payload.message
+    session.add(lead)
+    await session.commit()
+    await session.refresh(lead)
+    return lead
+
+
+# ---------------------------------------------------------------------------
+# Team Members CRUD
+# ---------------------------------------------------------------------------
+
+@router.get("/team/{slug}", response_model=List[TeamMemberOut])
+async def get_team_members(
+    slug: str,
+    session: AsyncSession = Depends(get_session),
+    current_startup: dict = Depends(get_current_startup),
+):
+    if current_startup["slug"] != slug:
+        raise HTTPException(status_code=403, detail="Accès non autorisé.")
+    startup = await _get_startup_or_404(slug, session)
+    result = await session.execute(
+        select(TeamMember).where(col(TeamMember.startup_id) == startup.id)
+    )
+    return result.scalars().all()
+
+
+@router.post("/team/{slug}", response_model=TeamMemberOut, status_code=201)
+async def add_team_member(
+    slug: str,
+    payload: TeamMemberCreate,
+    session: AsyncSession = Depends(get_session),
+    current_startup: dict = Depends(get_current_startup),
+):
+    if current_startup["slug"] != slug:
+        raise HTTPException(status_code=403, detail="Accès non autorisé.")
+    startup = await _get_startup_or_404(slug, session)
+    member = TeamMember(
+        startup_id=startup.id,
+        name=payload.name,
+        role=payload.role,
+        avatar_url=payload.avatar_url or "",
+        linkedin_url=payload.linkedin_url or "",
+    )
+    session.add(member)
+    await session.commit()
+    await session.refresh(member)
+    return member
+
+
+@router.delete("/team/{slug}/{member_id}", status_code=204)
+async def delete_team_member(
+    slug: str,
+    member_id: uuid.UUID,
+    session: AsyncSession = Depends(get_session),
+    current_startup: dict = Depends(get_current_startup),
+):
+    if current_startup["slug"] != slug:
+        raise HTTPException(status_code=403, detail="Accès non autorisé.")
+    startup = await _get_startup_or_404(slug, session)
+    result = await session.execute(
+        select(TeamMember).where(
+            col(TeamMember.id) == member_id,
+            col(TeamMember.startup_id) == startup.id,
+        )
+    )
+    member = result.scalar_one_or_none()
+    if not member:
+        raise HTTPException(status_code=404, detail="Membre introuvable.")
+    await session.delete(member)
+    await session.commit()
+
+
+# ---------------------------------------------------------------------------
+# Startup Needs CRUD
+# ---------------------------------------------------------------------------
+
+@router.get("/needs/{slug}", response_model=List[StartupNeedOut])
+async def get_startup_needs(
+    slug: str,
+    session: AsyncSession = Depends(get_session),
+    current_startup: dict = Depends(get_current_startup),
+):
+    if current_startup["slug"] != slug:
+        raise HTTPException(status_code=403, detail="Accès non autorisé.")
+    startup = await _get_startup_or_404(slug, session)
+    result = await session.execute(
+        select(StartupNeed).where(col(StartupNeed.startup_id) == startup.id)
+    )
+    return result.scalars().all()
+
+
+@router.post("/needs/{slug}", response_model=StartupNeedOut, status_code=201)
+async def add_startup_need(
+    slug: str,
+    payload: StartupNeedCreate,
+    session: AsyncSession = Depends(get_session),
+    current_startup: dict = Depends(get_current_startup),
+):
+    if current_startup["slug"] != slug:
+        raise HTTPException(status_code=403, detail="Accès non autorisé.")
+    startup = await _get_startup_or_404(slug, session)
+    need = StartupNeed(
+        startup_id=startup.id,
+        category=payload.category,
+        need_type=payload.need_type,
+        title=payload.title,
+        description=payload.description,
+    )
+    session.add(need)
+    await session.commit()
+    await session.refresh(need)
+    return need
+
+
+@router.delete("/needs/{slug}/{need_id}", status_code=204)
+async def delete_startup_need(
+    slug: str,
+    need_id: uuid.UUID,
+    session: AsyncSession = Depends(get_session),
+    current_startup: dict = Depends(get_current_startup),
+):
+    if current_startup["slug"] != slug:
+        raise HTTPException(status_code=403, detail="Accès non autorisé.")
+    startup = await _get_startup_or_404(slug, session)
+    result = await session.execute(
+        select(StartupNeed).where(
+            col(StartupNeed.id) == need_id,
+            col(StartupNeed.startup_id) == startup.id,
+        )
+    )
+    need = result.scalar_one_or_none()
+    if not need:
+        raise HTTPException(status_code=404, detail="Besoin introuvable.")
+    await session.delete(need)
+    await session.commit()
+

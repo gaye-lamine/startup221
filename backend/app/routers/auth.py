@@ -45,8 +45,9 @@ async def login(
             detail="Identifiants incorrects (mot de passe invalide).",
         )
         
-    # Generate a simple session token
-    token = f"session_{uuid.uuid4().hex}"
+    # Generate a real JWT token
+    from app.core.security import create_access_token
+    token = create_access_token(data={"slug": startup.slug, "email": startup.email})
     
     return LoginResponse(
         token=token,

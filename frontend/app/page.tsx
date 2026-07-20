@@ -1,10 +1,13 @@
 "use client";
 
 import React, { useState, useEffect, useCallback } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { API } from "../lib/api";
 import StartupCard, { Startup } from "../components/startup/StartupCard";
 
 export default function DirectoryPage() {
+  const router = useRouter();
   const [startups, setStartups] = useState<Startup[]>([]);
   const [totalCount, setTotalCount] = useState(0);
   const [page, setPage] = useState(1);
@@ -13,6 +16,44 @@ export default function DirectoryPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [searchSubmitted, setSearchSubmitted] = useState("");
   const [sortBy, setSortBy] = useState("recent");
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [startupName, setStartupName] = useState("");
+  const [startupSlug, setStartupSlug] = useState("");
+
+  const [trendsData, setTrendsData] = useState<{
+    total_startups: number;
+    sectors_count: number;
+    cities_count: number;
+  }>({
+    total_startups: 0,
+    sectors_count: 0,
+    cities_count: 0,
+  });
+
+  useEffect(() => {
+    if (localStorage.getItem("startup_session") === "true") {
+      setIsLoggedIn(true);
+      setStartupName(localStorage.getItem("startup_name") || "");
+      setStartupSlug(localStorage.getItem("startup_slug") || "");
+    }
+
+    async function fetchTrends() {
+      try {
+        const res = await fetch(API.startups.trends);
+        if (res.ok) {
+          const data = await res.json();
+          setTrendsData({
+            total_startups: data.total_startups || 0,
+            sectors_count: data.by_sector?.length || 0,
+            cities_count: data.by_city?.length || 0,
+          });
+        }
+      } catch (err) {
+        console.error("Trends fetch error", err);
+      }
+    }
+    fetchTrends();
+  }, []);
 
   // Filtering States
   const [selectedSectors, setSelectedSectors] = useState<string[]>([]);
@@ -181,6 +222,30 @@ export default function DirectoryPage() {
               </button>
             ))}
           </div>
+
+          {/* Contextual Banner — Logged-in Founder */}
+          {isLoggedIn && (
+            <div className="mt-6 inline-flex items-center gap-3 bg-brand-50 border border-brand-100 rounded-xl px-5 py-3 text-sm">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 shrink-0" />
+              <span className="text-slate-600 font-medium">
+                Connecté en tant que <strong className="text-brand-active">{startupName}</strong>
+              </span>
+              <button
+                onClick={() => router.push("/dashboard")}
+                className="text-xs font-bold text-brand-active hover:underline ml-1"
+              >
+                Mon tableau de bord &rarr;
+              </button>
+              {startupSlug && (
+                <button
+                  onClick={() => router.push(`/startup/${startupSlug}`)}
+                  className="text-xs font-bold text-slate-500 hover:text-brand-active hover:underline"
+                >
+                  Voir ma fiche
+                </button>
+              )}
+            </div>
+          )}
         </div>
       </section>
 
@@ -189,21 +254,27 @@ export default function DirectoryPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-slate-100 text-center gap-6 md:gap-0">
             <div className="md:px-4 py-2 md:py-0">
-              <span className="block text-3xl font-extrabold text-brand-active mb-1">+150</span>
+              <span className="block text-3xl font-extrabold text-brand-active mb-1">
+                {trendsData.total_startups > 0 ? trendsData.total_startups : startups.length}
+              </span>
               <span className="text-xs font-bold text-slate-400 tracking-widest uppercase">
                 Startups Référencées
               </span>
             </div>
             <div className="md:px-4 py-2 md:py-0">
-              <span className="block text-3xl font-extrabold text-emerald-600 mb-1">12 Milliards FCFA</span>
+              <span className="block text-3xl font-extrabold text-emerald-600 mb-1">
+                {trendsData.sectors_count > 0 ? `${trendsData.sectors_count} Secteurs` : "Tech & Innovation"}
+              </span>
               <span className="text-xs font-bold text-slate-400 tracking-widest uppercase">
-                Levés via le réseau
+                Secteurs d&apos;Activité
               </span>
             </div>
             <div className="md:px-4 py-2 md:py-0">
-              <span className="block text-3xl font-extrabold text-brand-active mb-1">+50</span>
+              <span className="block text-3xl font-extrabold text-brand-active mb-1">
+                {trendsData.cities_count > 0 ? `${trendsData.cities_count} Villes` : "Sénégal & Diaspora"}
+              </span>
               <span className="text-xs font-bold text-slate-400 tracking-widest uppercase">
-                Investisseurs Actifs
+                Couverture Géographique
               </span>
             </div>
           </div>

@@ -12,6 +12,8 @@ export interface Startup {
   employee_count: number;
   description: string;
   seeking: string[];
+  funding_amount?: string;
+  pitch_deck_url?: string;
 }
 
 interface StartupCardProps {
@@ -40,13 +42,13 @@ export default function StartupCard({ startup }: StartupCardProps) {
   const getSeekingBadge = (need: string) => {
     const n = need.toLowerCase();
     if (n.includes("investiss")) {
-      return { label: "Investisseurs", emoji: "🎯", class: "bg-rose-50 border-rose-100 text-rose-700" };
+      return { label: "Investisseurs", class: "bg-rose-50 border-rose-100 text-rose-700" };
     } else if (n.includes("partenaire")) {
-      return { label: "Partenaires", emoji: "🤝", class: "bg-teal-50 border-teal-100 text-teal-700" };
+      return { label: "Partenaires", class: "bg-teal-50 border-teal-100 text-teal-700" };
     } else if (n.includes("recrut")) {
-      return { label: "Recrutement", emoji: "💼", class: "bg-violet-50 border-violet-100 text-violet-700" };
+      return { label: "Recrutement", class: "bg-violet-50 border-violet-100 text-violet-700" };
     }
-    return { label: need, emoji: "💡", class: "bg-slate-50 border-slate-100 text-slate-700" };
+    return { label: need, class: "bg-slate-50 border-slate-100 text-slate-700" };
   };
 
   return (
@@ -89,7 +91,6 @@ export default function StartupCard({ startup }: StartupCardProps) {
         {/* Metadata Line */}
         <div className="flex flex-wrap items-center gap-2 text-xs">
           <div className="flex items-center gap-1 text-slate-400 font-bold bg-slate-50 border border-slate-200/50 px-2.5 py-1 rounded-lg">
-            <span>👥</span>
             <span>{startup.employee_count} collaborateurs</span>
           </div>
 
@@ -101,7 +102,6 @@ export default function StartupCard({ startup }: StartupCardProps) {
                 key={index}
                 className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg border text-[11px] font-bold ${badge.class}`}
               >
-                <span>{badge.emoji}</span>
                 <span>{badge.label}</span>
               </span>
             );

@@ -1,11 +1,19 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { API } from "../../lib/api";
 
 export default function RegisterPage() {
   const router = useRouter();
+
+  useEffect(() => {
+    const session = localStorage.getItem("startup_session");
+    if (session === "true") {
+      router.push("/dashboard");
+    }
+  }, [router]);
+
   const [step, setStep] = useState(1);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
@@ -23,6 +31,40 @@ export default function RegisterPage() {
   // Media States
   const [logoUrl, setLogoUrl] = useState("https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=100&auto=format&fit=crop");
   const [primaryColor, setPrimaryColor] = useState("#0C8A4D");
+  const [uploading, setUploading] = useState(false);
+  const [uploadMessage, setUploadMessage] = useState<string | null>(null);
+
+  const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploading(true);
+    setUploadMessage(null);
+    const formData = new FormData();
+    formData.append("file", file);
+
+    try {
+      const res = await fetch(API.startups.upload, {
+        method: "POST",
+        body: formData,
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        setLogoUrl(data.secure_url);
+        setUploadMessage("Logo téléversé avec succès !");
+      } else {
+        const errData = await res.json();
+        console.error("Backend upload failed:", errData);
+        setUploadMessage("Erreur : Le téléversement du logo a échoué.");
+      }
+    } catch (err) {
+      console.error("Upload network error:", err);
+      setUploadMessage("Erreur de connexion lors du téléversement.");
+    } finally {
+      setUploading(false);
+    }
+  };
 
   // Goals & Links States
   const [needs, setNeeds] = useState<string[]>([]);
@@ -110,11 +152,13 @@ export default function RegisterPage() {
       });
 
       if (res.ok) {
+        const data = await res.json();
         setSubmitted(true);
         // Automatically sign in the founder
         localStorage.setItem("startup_session", "true");
         localStorage.setItem("startup_slug", payload.slug);
         localStorage.setItem("startup_name", name);
+        localStorage.setItem("startup_token", data.token);
         setTimeout(() => {
           router.push("/dashboard");
           window.location.reload(); // Force header state refresh
@@ -349,14 +393,50 @@ export default function RegisterPage() {
 
                 <div>
                   <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">
-                    URL du Logo (Image)
+                    Logo de la Startup
                   </label>
-                  <input
-                    type="text"
-                    value={logoUrl}
-                    onChange={(e) => setLogoUrl(e.target.value)}
-                    className="w-full border border-slate-200 px-4 py-2.5 rounded-xl text-sm outline-none focus:border-brand-active focus:ring-2 focus:ring-brand-50"
-                  />
+                  <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
+                    <div className="w-16 h-16 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-center p-2 overflow-hidden shrink-0">
+                      {logoUrl && logoUrl.startsWith("http") ? (
+                        <img src={logoUrl} alt="Aperçu logo" className="w-full h-full object-contain" />
+                      ) : (
+                        <span className="text-slate-300 text-xs font-bold uppercase">Aucun</span>
+                      )}
+                    </div>
+                    
+                    <div className="flex-grow w-full space-y-2">
+                      <div className="flex gap-2">
+                        <input
+                          type="text"
+                          placeholder="Collez l'URL de votre logo ou téléversez ci-contre"
+                          value={logoUrl}
+                          onChange={(e) => setLogoUrl(e.target.value)}
+                          className="flex-grow border border-slate-200 px-4 py-2.5 rounded-xl text-sm outline-none focus:border-brand-active focus:ring-2 focus:ring-brand-50"
+                        />
+                        
+                        <label className="cursor-pointer bg-brand-light hover:bg-brand-active hover:text-white text-brand-active text-xs font-bold px-4 py-2.5 rounded-xl transition-all whitespace-nowrap flex items-center justify-center border border-brand-active/10 shrink-0 select-none">
+                          {uploading ? "Chargement..." : "Téléverser"}
+                          <input
+                            type="file"
+                            accept="image/*"
+                            disabled={uploading}
+                            onChange={handleLogoUpload}
+                            className="hidden"
+                          />
+                        </label>
+                      </div>
+                      {uploadMessage && (
+                        <p className={`text-xs font-semibold ${
+                          uploadMessage.includes("succès") ? "text-emerald-600" : "text-rose-600"
+                        }`}>
+                          {uploadMessage}
+                        </p>
+                      )}
+                      <p className="text-[10px] text-slate-400 leading-normal">
+                        Formats acceptés : PNG, JPG, SVG. Téléversement automatique.
+                      </p>
+                    </div>
+                  </div>
                 </div>
 
                 <div>

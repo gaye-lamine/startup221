@@ -16,11 +16,13 @@ export default function Header() {
 
   // Simulated logged-in state using localStorage for cross-page persistence
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [startupName, setStartupName] = useState("");
 
   useEffect(() => {
     const session = localStorage.getItem("startup_session");
     if (session === "true") {
       setIsLoggedIn(true);
+      setStartupName(localStorage.getItem("startup_name") || "Ma Startup");
     }
   }, []);
 
@@ -39,9 +41,11 @@ export default function Header() {
       if (res.ok) {
         const data = await res.json();
         setIsLoggedIn(true);
+        setStartupName(data.name);
         localStorage.setItem("startup_session", "true");
         localStorage.setItem("startup_slug", data.slug);
         localStorage.setItem("startup_name", data.name);
+        localStorage.setItem("startup_token", data.token);
         
         setShowLoginModal(false);
         router.push("/dashboard");
@@ -62,6 +66,7 @@ export default function Header() {
     localStorage.removeItem("startup_session");
     localStorage.removeItem("startup_slug");
     localStorage.removeItem("startup_name");
+    localStorage.removeItem("startup_token");
     router.push("/");
   };
 
@@ -75,42 +80,55 @@ export default function Header() {
             <img src="/logo-principal.svg" alt="StartupSN Logo" className="h-8 w-auto" />
           </Link>
           
-          <nav className="hidden md:flex items-center gap-8 h-16">
+          <nav className="hidden md:flex items-center gap-6 h-16">
             <Link
               href="/"
-              className={`text-sm font-semibold h-full flex items-center px-1 border-b-2 transition-all ${
+              className={`text-xs font-bold h-full flex items-center px-1 border-b-2 transition-all ${
                 pathname === "/" ? "text-brand-active border-brand-active" : "text-slate-500 hover:text-slate-900 border-transparent"
               }`}
             >
-              Directory
+              Startups
             </Link>
             <Link
-              href="/about"
-              className={`text-sm font-semibold h-full flex items-center px-1 border-b-2 transition-all ${
-                pathname === "/about" ? "text-brand-active border-brand-active" : "text-slate-500 hover:text-slate-900 border-transparent"
+              href="/investors"
+              className={`text-xs font-bold h-full flex items-center px-1 border-b-2 transition-all ${
+                pathname === "/investors" ? "text-brand-active border-brand-active" : "text-slate-500 hover:text-slate-900 border-transparent"
               }`}
             >
-              About
+              Investisseurs
             </Link>
-
-            {/* Conditionally render For Investors or Dashboard depending on login state */}
-            {!isLoggedIn ? (
-              <Link
-                href="/for-investors"
-                className={`text-sm font-semibold h-full flex items-center px-1 border-b-2 transition-all ${
-                  pathname === "/for-investors" ? "text-brand-active border-brand-active" : "text-slate-500 hover:text-slate-900 border-transparent"
-                }`}
-              >
-                For Investors
-              </Link>
-            ) : (
+            <Link
+              href="/partners"
+              className={`text-xs font-bold h-full flex items-center px-1 border-b-2 transition-all ${
+                pathname === "/partners" ? "text-brand-active border-brand-active" : "text-slate-500 hover:text-slate-900 border-transparent"
+              }`}
+            >
+              Incubateurs & Partenaires
+            </Link>
+            <Link
+              href="/opportunities"
+              className={`text-xs font-bold h-full flex items-center px-1 border-b-2 transition-all ${
+                pathname === "/opportunities" ? "text-brand-active border-brand-active" : "text-slate-500 hover:text-slate-900 border-transparent"
+              }`}
+            >
+              Appels à projets
+            </Link>
+            <Link
+              href="/resources"
+              className={`text-xs font-bold h-full flex items-center px-1 border-b-2 transition-all ${
+                pathname === "/resources" ? "text-brand-active border-brand-active" : "text-slate-500 hover:text-slate-900 border-transparent"
+              }`}
+            >
+              Ressources
+            </Link>
+            {isLoggedIn && (
               <Link
                 href="/dashboard"
-                className={`text-sm font-semibold h-full flex items-center px-1 border-b-2 transition-all ${
+                className={`text-xs font-bold h-full flex items-center px-1 border-b-2 transition-all ${
                   pathname.startsWith("/dashboard") ? "text-brand-active border-brand-active" : "text-slate-500 hover:text-slate-900 border-transparent"
                 }`}
               >
-                Dashboard
+                Tableau de Bord
               </Link>
             )}
           </nav>
@@ -124,22 +142,31 @@ export default function Header() {
                 onClick={() => setShowLoginModal(true)}
                 className="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors"
               >
-                Login
+                Se connecter
               </button>
               <Link
                 href="/register"
                 className="text-sm font-medium bg-brand-active text-white px-5 py-2.5 rounded-lg hover:bg-brand-600 transition-colors shadow-sm"
               >
-                Signup
+                Inscrire ma Startup
               </Link>
             </>
           ) : (
-            <button
-              onClick={handleLogout}
-              className="text-sm font-medium text-red-600 hover:text-red-700 transition-colors"
-            >
-              Logout
-            </button>
+            <div className="flex items-center gap-4">
+              <Link
+                href="/dashboard"
+                className="text-sm font-semibold text-slate-700 hover:text-brand-active flex items-center gap-1.5 transition-colors"
+              >
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                <span>{startupName}</span>
+              </Link>
+              <button
+                onClick={handleLogout}
+                className="text-sm font-semibold text-rose-600 hover:text-rose-700 transition-colors bg-rose-50 border border-rose-100 hover:bg-rose-100/50 px-3 py-1.5 rounded-lg text-xs uppercase tracking-wider"
+              >
+                Déconnexion
+              </button>
+            </div>
           )}
         </div>
       </div>

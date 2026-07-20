@@ -1,9 +1,18 @@
 "use client";
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 
 export default function AboutPage() {
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  useEffect(() => {
+    const session = localStorage.getItem("startup_session");
+    if (session === "true") {
+      setIsLoggedIn(true);
+    }
+  }, []);
+  
   return (
     <div className="bg-brand-paper min-h-screen pb-20">
       {/* ─── HERO SECTION ────────────────────────────────────────────── */}
@@ -34,7 +43,7 @@ export default function AboutPage() {
               href="/for-investors"
               className="w-full sm:w-auto bg-white hover:bg-slate-50 text-slate-700 font-bold px-8 py-4 rounded-xl border border-slate-200 transition-all text-sm text-center"
             >
-              Accès Investisseurs &rsaquo;
+              Espace Investisseurs &rsaquo;
             </Link>
           </div>
         </div>
@@ -54,8 +63,8 @@ export default function AboutPage() {
         <div className="grid md:grid-cols-3 gap-8">
           {/* Card 1 */}
           <div className="bg-white border border-slate-200/60 rounded-2xl p-8 shadow-sm hover:shadow-md transition-all duration-300">
-            <div className="w-12 h-12 bg-brand-50 rounded-2xl flex items-center justify-center mb-6 text-2xl">
-              🌐
+            <div className="w-12 h-12 bg-brand-50 rounded-2xl flex items-center justify-center mb-6">
+              <span className="w-3 h-3 rounded-full bg-brand-active" />
             </div>
             <h3 className="text-xl font-extrabold text-brand-dark mb-3">Connectez-vous</h3>
             <p className="text-sm text-slate-500 leading-relaxed font-medium">
@@ -65,8 +74,8 @@ export default function AboutPage() {
 
           {/* Card 2 */}
           <div className="bg-white border border-slate-200/60 rounded-2xl p-8 shadow-sm hover:shadow-md transition-all duration-300">
-            <div className="w-12 h-12 bg-amber-50 rounded-2xl flex items-center justify-center mb-6 text-2xl">
-              📈
+            <div className="w-12 h-12 bg-amber-50 rounded-2xl flex items-center justify-center mb-6">
+              <span className="w-3 h-3 rounded-full bg-brand-gold" />
             </div>
             <h3 className="text-xl font-extrabold text-brand-dark mb-3">Gagnez en visibilité</h3>
             <p className="text-sm text-slate-500 leading-relaxed font-medium">
@@ -76,8 +85,8 @@ export default function AboutPage() {
 
           {/* Card 3 */}
           <div className="bg-white border border-slate-200/60 rounded-2xl p-8 shadow-sm hover:shadow-md transition-all duration-300">
-            <div className="w-12 h-12 bg-emerald-50 rounded-2xl flex items-center justify-center mb-6 text-2xl">
-              🤝
+            <div className="w-12 h-12 bg-emerald-50 rounded-2xl flex items-center justify-center mb-6">
+              <span className="w-3 h-3 rounded-full bg-emerald-500" />
             </div>
             <h3 className="text-xl font-extrabold text-brand-dark mb-3">Saisissez des opportunités</h3>
             <p className="text-sm text-slate-500 leading-relaxed font-medium">
@@ -105,7 +114,6 @@ export default function AboutPage() {
             <div className="bg-brand-paper border border-slate-200/50 rounded-2xl p-8 flex flex-col justify-between shadow-sm">
               <div>
                 <div className="flex items-center gap-3 mb-4">
-                  <span className="text-3xl">🚀</span>
                   <h3 className="text-lg font-extrabold text-brand-dark uppercase tracking-wider">Pensé pour les startups</h3>
                 </div>
                 <h4 className="text-sm font-bold text-slate-700 mb-6">Placez votre projet au cœur de l'action</h4>
@@ -134,7 +142,6 @@ export default function AboutPage() {
             <div className="bg-brand-paper border border-slate-200/50 rounded-2xl p-8 flex flex-col justify-between shadow-sm">
               <div>
                 <div className="flex items-center gap-3 mb-4">
-                  <span className="text-3xl">💼</span>
                   <h3 className="text-lg font-extrabold text-brand-dark uppercase tracking-wider">Pensé pour les investisseurs</h3>
                 </div>
                 <h4 className="text-sm font-bold text-slate-700 mb-6">Repérez les meilleures opportunités</h4>
@@ -153,7 +160,7 @@ export default function AboutPage() {
                   </li>
                   <li className="flex items-start gap-2.5 text-xs text-slate-500 font-medium leading-relaxed">
                     <span className="text-brand-active font-extrabold mt-0.5">&bull;</span>
-                    <span>Un profil visible des startups qui vous correspondent.</span>
+                    <span>L&apos;accès complet aux fiches détaillées des startups.</span>
                   </li>
                 </ul>
               </div>
@@ -163,7 +170,6 @@ export default function AboutPage() {
             <div className="bg-brand-paper border border-slate-200/50 rounded-2xl p-8 flex flex-col justify-between shadow-sm">
               <div>
                 <div className="flex items-center gap-3 mb-4">
-                  <span className="text-3xl">🏢</span>
                   <h3 className="text-lg font-extrabold text-brand-dark uppercase tracking-wider">Pensé pour les partenaires</h3>
                 </div>
                 <h4 className="text-sm font-bold text-slate-700 mb-6">Identifiez l'innovation qui transformera votre secteur</h4>
@@ -208,12 +214,21 @@ export default function AboutPage() {
           </p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <Link
-              href="/register"
-              className="w-full sm:w-auto bg-brand-gold hover:bg-yellow-500 text-brand-dark font-bold px-8 py-4 rounded-xl transition-all shadow-md text-sm text-center"
-            >
-              Inscrire ma Startup &rarr;
-            </Link>
+            {isLoggedIn ? (
+              <Link
+                href="/dashboard"
+                className="w-full sm:w-auto bg-brand-gold hover:bg-yellow-500 text-brand-dark font-bold px-8 py-4 rounded-xl transition-all shadow-md text-sm text-center"
+              >
+                Mon Tableau de Bord &rarr;
+              </Link>
+            ) : (
+              <Link
+                href="/register"
+                className="w-full sm:w-auto bg-brand-gold hover:bg-yellow-500 text-brand-dark font-bold px-8 py-4 rounded-xl transition-all shadow-md text-sm text-center"
+              >
+                Inscrire ma Startup &rarr;
+              </Link>
+            )}
             <Link
               href="/"
               className="w-full sm:w-auto bg-white/10 hover:bg-white/20 text-white font-bold px-8 py-4 rounded-xl border border-white/20 transition-all text-sm text-center"

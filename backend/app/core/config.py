@@ -22,10 +22,15 @@ class Settings(BaseSettings):
         return v
 
     # PostgreSQL Database url (defaults to SQLite for local development out-of-the-box)
-    DATABASE_URL: str = "sqlite+aiosqlite:///./startup221.db"
+    DATABASE_URL: str = "sqlite+aiosqlite:///./startupsn.db"
 
     # Redis Url
     REDIS_URL: str = "redis://localhost:6379/0"
+
+    # Cloudinary Config
+    CLOUDINARY_CLOUD_NAME: str = "dygcctw10"
+    CLOUDINARY_API_KEY: str = "177499727553148"
+    CLOUDINARY_API_SECRET: str = "hgMZ5cccRnd2CO6hbVM9qR_oXZ8"
 
 
 settings = Settings()
