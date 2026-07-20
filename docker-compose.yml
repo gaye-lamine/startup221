@@ -1,0 +1,25 @@
+version: '3.8'
+
+services:
+  startup221_backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: startup221_backend
+    restart: always
+    ports:
+      - "8001:8000"
+    environment:
+      - APP_NAME=StartupSN API
+      - ENVIRONMENT=production
+
+  startup221_frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: startup221_frontend
+    restart: always
+    ports:
+      - "3001:3000"
+    environment:
+      - NEXT_PUBLIC_API_URL=http://72.60.213.116:8001
