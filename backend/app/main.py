@@ -69,14 +69,20 @@ class StartupPaginatedResponse(BaseModel):
 # ---------------------------------------------------------------------------
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    await redis_client.connect()
+    try:
+        await redis_client.connect()
+    except Exception as e:
+        print(f"Redis connection skipped: {e}")
     
     async with engine.begin() as conn:
         await conn.run_sync(SQLModel.metadata.create_all)
         
     yield
     
-    await redis_client.disconnect()
+    try:
+        await redis_client.disconnect()
+    except Exception:
+        pass
 
 # ---------------------------------------------------------------------------
 # FastAPI App Initialization

@@ -5,7 +5,7 @@
  *  - Netlify Dashboard → Site Settings → Environment Variables for production
  */
 export const API_BASE =
-  process.env.NEXT_PUBLIC_API_URL?.replace(/\/$/, "") ?? "http://127.0.0.1:8000";
+  process.env.NEXT_PUBLIC_API_URL?.replace(/\/$/, "") ?? "https://startup.backnd-api.cloud";
 
 export const API = {
   startups: {
