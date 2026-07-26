@@ -98,16 +98,23 @@ app = FastAPI(
 API_V1_PREFIX = "/api/v1"
 
 # CORS Configuration
+# Origins are deduplicated via set() to prevent duplicate
+# Access-Control-Allow-Origin headers (e.g. when a reverse proxy like
+# Traefik also adds CORS headers on top of FastAPI's own middleware).
+_CORS_ORIGINS = list(dict.fromkeys([
+    "http://localhost:3000",
+    "http://localhost:3001",
+    "http://127.0.0.1:3000",
+    "http://127.0.0.1:3001",
+    "https://startup221.netlify.app",
+    "https://startupsn.netlify.app",
+    "https://www.startups.sn",
+    "https://startups.sn",
+]))
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:3000",
-        "http://localhost:3001",
-        "http://127.0.0.1:3000",
-        "http://127.0.0.1:3001",
-        "https://startup221.netlify.app",
-        "https://startupsn.netlify.app",
-    ],
+    allow_origins=_CORS_ORIGINS,
     allow_origin_regex=r"https://.*\.netlify\.app",
     allow_credentials=True,
     allow_methods=["*"],
