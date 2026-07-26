@@ -127,8 +127,14 @@ async def seed():
 
     async with async_session() as session:
         async with engine.begin() as conn:
-            # Drop and create tables cleanly
-            await conn.run_sync(SQLModel.metadata.drop_all)
+            # Drop tables with CASCADE to handle FK dependencies (Postgres-compatible)
+            await conn.execute(
+                __import__("sqlalchemy").text(
+                    "DROP TABLE IF EXISTS leads, team_members, startup_needs, "
+                    "investor_leads, investors, partners, opportunity_programs, "
+                    "resources, startups CASCADE"
+                )
+            )
             await conn.run_sync(SQLModel.metadata.create_all)
             
         for s in startups:
