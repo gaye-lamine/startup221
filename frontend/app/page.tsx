@@ -353,7 +353,7 @@ export default function DirectoryPage() {
         <div className="flex flex-col lg:flex-row gap-8 items-start">
           
           {/* Left Column: Sidebar Filters */}
-          <aside className={`w-full lg:w-64 shrink-0 bg-white border border-slate-100 rounded-2xl p-6 shadow-sm space-y-8 ${
+          <aside className={`w-full lg:w-64 shrink-0 bg-white border border-slate-100 rounded-2xl p-6 shadow-sm space-y-8 lg:sticky lg:top-24 lg:max-h-[calc(100vh-7rem)] lg:overflow-y-auto ${
             showFiltersMobile ? "block" : "hidden lg:block"
           }`}>
             <div className="flex justify-between items-center pb-4 border-b border-slate-100">
