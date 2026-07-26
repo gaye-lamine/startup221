@@ -32,6 +32,8 @@ export const API = {
     subscribe: `${API_BASE}/api/v1/investors/subscribe`,
     directory: `${API_BASE}/api/v1/investors/directory`,
     bySlug: (slug: string) => `${API_BASE}/api/v1/investors/directory/${slug}`,
+    create: `${API_BASE}/api/v1/investors/directory`,
+    delete: (id: string) => `${API_BASE}/api/v1/investors/directory/${id}`,
   },
   partners: {
     list: `${API_BASE}/api/v1/partners`,
@@ -39,6 +41,7 @@ export const API = {
     programs: `${API_BASE}/api/v1/programs`,
     programDelete: (id: string) => `${API_BASE}/api/v1/programs/${id}`,
     resources: `${API_BASE}/api/v1/resources`,
+    resourceDelete: (id: string) => `${API_BASE}/api/v1/resources/${id}`,
   },
   auth: {
     login: `${API_BASE}/api/v1/auth/login`,
