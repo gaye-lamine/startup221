@@ -1,14 +1,32 @@
 import uuid
-from typing import List, Optional
-from fastapi import APIRouter, Depends, HTTPException, Query
-from pydantic import BaseModel
+from typing import Annotated, List, Optional
+from fastapi import APIRouter, Depends, Header, HTTPException, Query, status
+from pydantic import BaseModel, EmailStr, Field
 from sqlmodel import select, col
 from sqlmodel.ext.asyncio.session import AsyncSession
 
 from app.core.database import get_session
+from app.core.security import decode_access_token
 from app.entities.partner import Partner
 from app.entities.program import OpportunityProgram
 from app.entities.resource import Resource
+
+
+def get_current_admin(authorization: Annotated[Optional[str], Header()] = None) -> dict:
+    if not authorization or not authorization.startswith("Bearer "):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Jeton d'administration manquant ou invalide.",
+        )
+    token = authorization.split(" ", 1)[1].strip()
+    payload = decode_access_token(token)
+    if not payload or payload.get("role") != "admin":
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Jeton d'administration invalide ou expiré.",
+        )
+
+    return payload
 
 router = APIRouter(tags=["Partners & Ecosystem"])
 
@@ -28,9 +46,40 @@ class PartnerRead(BaseModel):
     class Config:
         from_attributes = True
 
+
+class PartnerCreate(BaseModel):
+    name: str
+    slug: str
+    email: EmailStr
+    partner_type: str = "Incubateur"
+    logo_url: str = ""
+    description: str = ""
+    city: str = "Dakar"
+    website_url: str = ""
+    linkedin_url: str = ""
+
+
+class ProgramCreate(BaseModel):
+    partner_id: Optional[uuid.UUID] = None
+    partner_name: str = "Écosystème Tech"
+    title: str
+    category: str = "Appel à projets"
+    description: str = ""
+    deadline: str = "31 Décembre 2026"
+    apply_url: str = ""
+    target_sectors: List[str] = Field(default_factory=list)
+
+
+class ResourceCreate(BaseModel):
+    title: str
+    category: str = "Modèle Document"
+    description: str = ""
+    file_type: str = "PDF"
+    file_url: str = ""
+
 class ProgramRead(BaseModel):
     id: uuid.UUID
-    partner_id: Optional[uuid.UUID]
+    partner_id: Optional[uuid.UUID] = None
     partner_name: str
     title: str
     category: str
@@ -210,7 +259,7 @@ async def list_resources(
 
 # CRUD API Extensions for Dynamic Management
 
-@router.post("/partners", response_model=PartnerRead)
+@router.post("/partners", response_model=PartnerRead, dependencies=[Depends(get_current_admin)])
 async def create_partner(
     partner_data: PartnerCreate,
     session: AsyncSession = Depends(get_session),
@@ -221,7 +270,7 @@ async def create_partner(
     await session.refresh(new_partner)
     return new_partner
 
-@router.delete("/partners/{partner_id}")
+@router.delete("/partners/{partner_id}", dependencies=[Depends(get_current_admin)])
 async def delete_partner(
     partner_id: str,
     session: AsyncSession = Depends(get_session),
@@ -233,7 +282,7 @@ async def delete_partner(
     await session.commit()
     return {"message": "Partner deleted successfully"}
 
-@router.post("/programs", response_model=ProgramRead)
+@router.post("/programs", response_model=ProgramRead, dependencies=[Depends(get_current_admin)])
 async def create_program(
     program_data: ProgramCreate,
     session: AsyncSession = Depends(get_session),
@@ -244,7 +293,7 @@ async def create_program(
     await session.refresh(new_program)
     return new_program
 
-@router.delete("/programs/{program_id}")
+@router.delete("/programs/{program_id}", dependencies=[Depends(get_current_admin)])
 async def delete_program(
     program_id: str,
     session: AsyncSession = Depends(get_session),
@@ -256,7 +305,7 @@ async def delete_program(
     await session.commit()
     return {"message": "Program deleted successfully"}
 
-@router.post("/resources", response_model=ResourceRead)
+@router.post("/resources", response_model=ResourceRead, dependencies=[Depends(get_current_admin)])
 async def create_resource(
     resource_data: ResourceCreate,
     session: AsyncSession = Depends(get_session),
@@ -267,7 +316,7 @@ async def create_resource(
     await session.refresh(new_resource)
     return new_resource
 
-@router.delete("/resources/{resource_id}")
+@router.delete("/resources/{resource_id}", dependencies=[Depends(get_current_admin)])
 async def delete_resource(
     resource_id: str,
     session: AsyncSession = Depends(get_session),

@@ -1,14 +1,31 @@
 import uuid
-from typing import List, Optional
-from fastapi import APIRouter, Depends, HTTPException, Query
-from pydantic import BaseModel
+from typing import Annotated, List, Optional
+from fastapi import APIRouter, Depends, Header, HTTPException, Query, status
+from pydantic import BaseModel, EmailStr, Field
 from sqlmodel import select, col
 from sqlmodel.ext.asyncio.session import AsyncSession
 
 from app.core.database import get_session
+from app.core.security import decode_access_token
 from app.entities.investor import Investor
 
 router = APIRouter(prefix="/investors", tags=["Investors Directory"])
+
+
+def get_current_admin(authorization: Annotated[Optional[str], Header()] = None) -> dict:
+    if not authorization or not authorization.startswith("Bearer "):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Jeton d'administration manquant ou invalide.",
+        )
+    token = authorization.split(" ", 1)[1].strip()
+    payload = decode_access_token(token)
+    if not payload or payload.get("role") != "admin":
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Jeton d'administration invalide ou expiré.",
+        )
+    return payload
 
 class InvestorRead(BaseModel):
     id: uuid.UUID
@@ -27,6 +44,21 @@ class InvestorRead(BaseModel):
 
     class Config:
         from_attributes = True
+
+
+class InvestorCreate(BaseModel):
+    name: str
+    slug: str
+    email: EmailStr
+    entity_type: str = "Business Angel"
+    logo_url: str = ""
+    bio: str = ""
+    investment_stages: List[str] = Field(default_factory=list)
+    sectors: List[str] = Field(default_factory=list)
+    ticket_size: str = "10M - 50M FCFA"
+    city: str = "Dakar"
+    website_url: str = ""
+    linkedin_url: str = ""
 
 # Seed initial real ecosystem investor data if empty
 SEED_INVESTORS = [
@@ -112,7 +144,7 @@ async def get_investor_by_slug(
         raise HTTPException(status_code=404, detail="Investisseur introuvable")
     return investor
 
-@router.post("/directory", response_model=InvestorRead)
+@router.post("/directory", response_model=InvestorRead, dependencies=[Depends(get_current_admin)])
 async def create_investor(
     investor_data: InvestorCreate,
     session: AsyncSession = Depends(get_session),
@@ -123,7 +155,7 @@ async def create_investor(
     await session.refresh(new_investor)
     return new_investor
 
-@router.delete("/directory/{investor_id}")
+@router.delete("/directory/{investor_id}", dependencies=[Depends(get_current_admin)])
 async def delete_investor(
     investor_id: str,
     session: AsyncSession = Depends(get_session),
