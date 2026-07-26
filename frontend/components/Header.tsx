@@ -4,12 +4,13 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
 import { API } from "../lib/api";
-import { ShieldCheck, LogOut, UserCheck, Lock } from "lucide-react";
+import { ShieldCheck, LogOut, UserCheck, Lock, Menu, X } from "lucide-react";
 
 export default function Header() {
   const router = useRouter();
   const pathname = usePathname();
   const [showLoginModal, setShowLoginModal] = useState(false);
+  const [showMobileMenu, setShowMobileMenu] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loginError, setLoginError] = useState<string | null>(null);
@@ -22,10 +23,12 @@ export default function Header() {
 
   useEffect(() => {
     checkAuthStatus();
+    setShowMobileMenu(false); // Close mobile menu on page transition
   }, [pathname]);
 
   const checkAuthStatus = () => {
-    const adminSession = localStorage.getItem("admin_session") === "true";
+    const adminToken = sessionStorage.getItem("admin_token");
+    const adminSession = !!(adminToken && adminToken.trim().length > 0);
     const startupSession = localStorage.getItem("startup_session") === "true";
 
     setIsAdmin(adminSession);
@@ -78,7 +81,7 @@ export default function Header() {
     localStorage.removeItem("startup_slug");
     localStorage.removeItem("startup_name");
     localStorage.removeItem("startup_token");
-    localStorage.removeItem("admin_session");
+    sessionStorage.removeItem("admin_token");
     router.push("/");
   };
 
@@ -156,8 +159,8 @@ export default function Header() {
           </nav>
         </div>
 
-        {/* Right Side */}
-        <div className="flex items-center gap-4">
+        {/* Right Side - Desktop Navigation Actions */}
+        <div className="hidden md:flex items-center gap-4">
           {isAdmin ? (
             /* Admin Logged-In State */
             <div className="flex items-center gap-3">
@@ -210,7 +213,123 @@ export default function Header() {
             </>
           )}
         </div>
+
+        {/* Mobile Hamburger Button */}
+        <div className="flex md:hidden items-center gap-2">
+          {isAdmin && (
+            <span className="inline-flex items-center gap-1 text-[10px] font-extrabold bg-amber-50 text-amber-700 border border-amber-200 px-2 py-1 rounded-md">
+              Admin
+            </span>
+          )}
+          {isLoggedIn && !isAdmin && (
+            <span className="inline-flex items-center gap-1 text-[10px] font-extrabold bg-emerald-50 text-emerald-700 border border-emerald-200 px-2 py-1 rounded-md">
+              Actif
+            </span>
+          )}
+          <button
+            onClick={() => setShowMobileMenu(!showMobileMenu)}
+            className="p-2 text-slate-600 hover:text-slate-900 focus:outline-none"
+            aria-label="Toggle Menu"
+          >
+            {showMobileMenu ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+          </button>
+        </div>
       </div>
+
+      {/* Mobile Navigation Drawer */}
+      {showMobileMenu && (
+        <div className="md:hidden border-t border-slate-100 bg-white py-4 px-4 space-y-3 shadow-lg">
+          <nav className="flex flex-col space-y-2">
+            <Link
+              href="/"
+              className={`text-xs font-bold py-2.5 px-3 rounded-lg transition-all ${
+                pathname === "/" ? "bg-brand-50 text-brand-active" : "text-slate-600 hover:bg-slate-50"
+              }`}
+            >
+              Startups
+            </Link>
+            <Link
+              href="/investors"
+              className={`text-xs font-bold py-2.5 px-3 rounded-lg transition-all ${
+                pathname === "/investors" ? "bg-brand-50 text-brand-active" : "text-slate-600 hover:bg-slate-50"
+              }`}
+            >
+              Investisseurs
+            </Link>
+            <Link
+              href="/partners"
+              className={`text-xs font-bold py-2.5 px-3 rounded-lg transition-all ${
+                pathname === "/partners" ? "bg-brand-50 text-brand-active" : "text-slate-600 hover:bg-slate-50"
+              }`}
+            >
+              Incubateurs & Partenaires
+            </Link>
+            <Link
+              href="/opportunities"
+              className={`text-xs font-bold py-2.5 px-3 rounded-lg transition-all ${
+                pathname === "/opportunities" ? "bg-brand-50 text-brand-active" : "text-slate-600 hover:bg-slate-50"
+              }`}
+            >
+              Appels à projets
+            </Link>
+            <Link
+              href="/resources"
+              className={`text-xs font-bold py-2.5 px-3 rounded-lg transition-all ${
+                pathname === "/resources" ? "bg-brand-50 text-brand-active" : "text-slate-600 hover:bg-slate-50"
+              }`}
+            >
+              Ressources
+            </Link>
+            {isAdmin && (
+              <Link
+                href="/admin"
+                className="text-xs font-extrabold py-2.5 px-3 rounded-lg bg-amber-50 text-amber-700 border border-amber-100"
+              >
+                Console Admin
+              </Link>
+            )}
+            {isLoggedIn && !isAdmin && (
+              <Link
+                href="/dashboard"
+                className="text-xs font-bold py-2.5 px-3 rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-100"
+              >
+                Tableau de Bord ({startupName})
+              </Link>
+            )}
+          </nav>
+
+          {/* Action buttons inside mobile drawer */}
+          <div className="pt-4 border-t border-slate-100 flex flex-col gap-2">
+            {isAdmin || isLoggedIn ? (
+              <button
+                onClick={handleLogout}
+                className="w-full bg-rose-50 border border-rose-100 text-rose-600 text-xs font-bold py-3 rounded-xl transition-all flex items-center justify-center gap-1.5"
+              >
+                <LogOut className="w-4 h-4" />
+                <span>Déconnexion</span>
+              </button>
+            ) : (
+              <>
+                <button
+                  onClick={() => {
+                    setShowMobileMenu(false);
+                    setShowLoginModal(true);
+                  }}
+                  className="w-full bg-slate-50 border border-slate-200 text-slate-700 text-xs font-bold py-3 rounded-xl hover:bg-slate-100 transition-all text-center"
+                >
+                  Se connecter
+                </button>
+                <Link
+                  href="/register"
+                  className="w-full bg-brand-active text-white text-xs font-bold py-3 rounded-xl hover:bg-brand-600 transition-all text-center block shadow-sm"
+                >
+                  Inscrire ma Startup
+                </Link>
+              </>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Login Modal */}
       {showLoginModal && (
