@@ -1,6 +1,23 @@
 version: '3.8'
 
 services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: startup221_postgres
+    restart: always
+    environment:
+      POSTGRES_USER: startupsn
+      POSTGRES_PASSWORD: zj3A_C2z8rALxdhTRlP6zgIhLq71XZBqA1-VKMbBCTU
+      POSTGRES_DB: startupsn
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U startupsn -d startupsn"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
   startup221_backend:
     build:
       context: ./backend
@@ -11,3 +28,10 @@ services:
       - ./backend/.env
     ports:
       - "8088:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+volumes:
+  postgres_data:
+    name: startup221_postgres_data
