@@ -5,9 +5,11 @@ from datetime import datetime, timedelta
 from typing import Optional
 from fastapi import Header, HTTPException, status
 
-SECRET_KEY = "startupsn_secret_key_change_me_in_production"
-ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24 * 7  # 7 days
+from app.core.config import settings
+
+SECRET_KEY = settings.SECRET_KEY
+ALGORITHM = settings.ALGORITHM
+ACCESS_TOKEN_EXPIRE_MINUTES = settings.ACCESS_TOKEN_EXPIRE_MINUTES
 
 def hash_password(password: str) -> str:
     """

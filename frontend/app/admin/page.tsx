@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { API } from "../../lib/api";
-import { Lock, Plus, Trash2, Building, Building2, Sparkles, BookOpen } from "lucide-react";
+import { Lock, Plus, Trash2 } from "lucide-react";
 
 interface InvestorLead {
   id: string;
@@ -40,6 +40,9 @@ interface ProgramItem {
 }
 
 export default function AdminPage() {
+  const API_BASE = process.env.NEXT_PUBLIC_API_URL?.replace(/\/$/, "") ?? "https://startup.backnd-api.cloud";
+  const adminLoginUrl = `${API_BASE}/api/v1/admin/login`;
+
   const [adminAuthenticated, setAdminAuthenticated] = useState(false);
   const [adminPassword, setAdminPassword] = useState("");
   const [passError, setPassError] = useState(false);
@@ -63,47 +66,75 @@ export default function AdminPage() {
   const [showAddProgramModal, setShowAddProgramModal] = useState(false);
   const [newProgTitle, setNewProgTitle] = useState("");
   const [newProgPartner, setNewProgPartner] = useState("");
-  const [newProgCategory, setNewProgCategory] = useState("Concours");
+  const newProgCategory = "Concours";
   const [newProgDeadline, setNewProgDeadline] = useState("");
   const [newProgDesc, setNewProgDesc] = useState("");
   const [newProgUrl, setNewProgUrl] = useState("");
 
   useEffect(() => {
-    const isAuth = localStorage.getItem("admin_session") === "true";
-    if (isAuth) {
+    const token = sessionStorage.getItem("admin_token");
+    if (token) {
       setAdminAuthenticated(true);
-      loadAdminData();
+      loadAdminData(token);
     }
   }, []);
 
-  const handleAdminLogin = (e: React.FormEvent) => {
+  const handleAdminLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (adminPassword === "startupsn2026" || adminPassword === "admin") {
-      localStorage.setItem("admin_session", "true");
+    try {
+      const res = await fetch(adminLoginUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ password: adminPassword }),
+      });
+
+      if (!res.ok) {
+        setPassError(true);
+        return;
+      }
+
+      const data = await res.json();
+      sessionStorage.setItem("admin_token", data.token);
       setAdminAuthenticated(true);
       setPassError(false);
-      loadAdminData();
-    } else {
+      setAdminPassword("");
+      loadAdminData(data.token);
+    } catch (error) {
+      console.error("Admin login error", error);
       setPassError(true);
     }
   };
 
   const handleAdminLogout = () => {
-    localStorage.removeItem("admin_session");
+    sessionStorage.removeItem("admin_token");
     setAdminAuthenticated(false);
     setAdminPassword("");
   };
 
-  async function loadAdminData() {
+  async function loadAdminData(tokenOverride?: string) {
+    const token = tokenOverride ?? sessionStorage.getItem("admin_token");
+    if (!token) {
+      setAdminAuthenticated(false);
+      return;
+    }
+
     setLoading(true);
     setError(null);
     try {
+      const headers = { Authorization: `Bearer ${token}` };
       const [invRes, stRes, partRes, progRes] = await Promise.all([
-        fetch(API.admin.investors),
-        fetch(API.admin.startups),
-        fetch(API.partners.list),
-        fetch(API.partners.programs),
+        fetch(API.admin.investors, { headers }),
+        fetch(API.admin.startups, { headers }),
+        fetch(API.partners.list, { headers }),
+        fetch(API.partners.programs, { headers }),
       ]);
+
+      if ([invRes, stRes, partRes, progRes].some((res) => res.status === 401 || res.status === 403)) {
+        sessionStorage.removeItem("admin_token");
+        setAdminAuthenticated(false);
+        setError("Session administrateur expirée.");
+        return;
+      }
 
       if (invRes.ok) setInvestors(await invRes.json());
       if (stRes.ok) setStartups(await stRes.json());
@@ -135,16 +166,20 @@ export default function AdminPage() {
     link.setAttribute("download", `investisseurs_startupsn_${Date.now()}.csv`);
     document.body.appendChild(link);
     link.click();
-    document.body.removeChild(link);
+    link.remove();
   };
 
   const handleCreatePartner = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
+      const token = sessionStorage.getItem("admin_token");
       const slug = newPartnerName.toLowerCase().replace(/[^a-z0-9]+/g, "-");
       const res = await fetch(API.partners.list, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
         body: JSON.stringify({
           name: newPartnerName,
           slug,
@@ -169,7 +204,11 @@ export default function AdminPage() {
   const handleDeletePartner = async (id: string) => {
     if (!confirm("Voulez-vous vraiment supprimer ce partenaire ?")) return;
     try {
-      const res = await fetch(`${API.partners.list}/${id}`, { method: "DELETE" });
+      const token = sessionStorage.getItem("admin_token");
+      const res = await fetch(`${API.partners.list}/${id}`, {
+        method: "DELETE",
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
       if (res.ok) loadAdminData();
     } catch (err) {
       console.error("Error deleting partner", err);
@@ -179,9 +218,13 @@ export default function AdminPage() {
   const handleCreateProgram = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
+      const token = sessionStorage.getItem("admin_token");
       const res = await fetch(API.partners.programs, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
         body: JSON.stringify({
           title: newProgTitle,
           partner_name: newProgPartner,
@@ -207,7 +250,11 @@ export default function AdminPage() {
   const handleDeleteProgram = async (id: string) => {
     if (!confirm("Voulez-vous vraiment supprimer cet appel à projets ?")) return;
     try {
-      const res = await fetch(`${API.partners.programs}/${id}`, { method: "DELETE" });
+      const token = sessionStorage.getItem("admin_token");
+      const res = await fetch(`${API.partners.programs}/${id}`, {
+        method: "DELETE",
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
       if (res.ok) loadAdminData();
     } catch (err) {
       console.error("Error deleting program", err);
@@ -345,7 +392,7 @@ export default function AdminPage() {
         </div>
 
         {/* Tabs */}
-        <div className="flex flex-wrap border-b border-slate-200 gap-6">
+        <div className="flex items-center gap-6 border-b border-slate-200 overflow-x-auto whitespace-nowrap pb-2 no-scrollbar">
           {[
             { id: "investors", label: `Inscrits / Newsletter (${investors.length})` },
             { id: "startups", label: `Startups (${startups.length})` },
@@ -355,7 +402,7 @@ export default function AdminPage() {
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id as any)}
-              className={`pb-3 text-sm font-extrabold border-b-2 transition-all ${
+              className={`pb-3 text-sm font-extrabold border-b-2 transition-all shrink-0 ${
                 activeTab === tab.id
                   ? "border-brand-active text-brand-active"
                   : "border-transparent text-slate-400 hover:text-slate-600"
@@ -395,7 +442,7 @@ export default function AdminPage() {
         {loading ? (
           <div className="p-12 text-center text-slate-500 font-medium">Chargement...</div>
         ) : activeTab === "partners" ? (
-          <div className="bg-white border border-slate-100 rounded-2xl shadow-sm overflow-hidden">
+          <div className="bg-white border border-slate-100 rounded-2xl shadow-sm overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead>
                 <tr className="bg-slate-50 text-[11px] font-bold text-slate-400 uppercase tracking-wider border-b border-slate-100">
@@ -425,7 +472,7 @@ export default function AdminPage() {
             </table>
           </div>
         ) : activeTab === "programs" ? (
-          <div className="bg-white border border-slate-100 rounded-2xl shadow-sm overflow-hidden">
+          <div className="bg-white border border-slate-100 rounded-2xl shadow-sm overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead>
                 <tr className="bg-slate-50 text-[11px] font-bold text-slate-400 uppercase tracking-wider border-b border-slate-100">
@@ -457,7 +504,7 @@ export default function AdminPage() {
             </table>
           </div>
         ) : activeTab === "investors" ? (
-          <div className="bg-white border border-slate-100 rounded-2xl shadow-sm overflow-hidden">
+          <div className="bg-white border border-slate-100 rounded-2xl shadow-sm overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead>
                 <tr className="bg-slate-50 text-[11px] font-bold text-slate-400 uppercase tracking-wider border-b border-slate-100">
@@ -484,7 +531,7 @@ export default function AdminPage() {
             </table>
           </div>
         ) : (
-          <div className="bg-white border border-slate-100 rounded-2xl shadow-sm overflow-hidden">
+          <div className="bg-white border border-slate-100 rounded-2xl shadow-sm overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead>
                 <tr className="bg-slate-50 text-[11px] font-bold text-slate-400 uppercase tracking-wider border-b border-slate-100">

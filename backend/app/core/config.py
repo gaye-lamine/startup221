@@ -27,10 +27,16 @@ class Settings(BaseSettings):
     # Redis Url
     REDIS_URL: str = "redis://localhost:6379/0"
 
+    # JWT Auth
+    SECRET_KEY: str
+    ALGORITHM: str = "HS256"
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 7
+    ADMIN_PASSWORD_HASH: str
+
     # Cloudinary Config
-    CLOUDINARY_CLOUD_NAME: str = "dygcctw10"
-    CLOUDINARY_API_KEY: str = "177499727553148"
-    CLOUDINARY_API_SECRET: str = "hgMZ5cccRnd2CO6hbVM9qR_oXZ8"
+    CLOUDINARY_CLOUD_NAME: str
+    CLOUDINARY_API_KEY: str
+    CLOUDINARY_API_SECRET: str
 
 
 settings = Settings()
