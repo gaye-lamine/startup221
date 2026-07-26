@@ -40,8 +40,7 @@ interface ProgramItem {
 }
 
 export default function AdminPage() {
-  const API_BASE = process.env.NEXT_PUBLIC_API_URL?.replace(/\/$/, "") ?? "https://startup.backnd-api.cloud";
-  const adminLoginUrl = `${API_BASE}/api/v1/admin/login`;
+  const adminLoginUrl = API.admin.login;
 
   const [adminAuthenticated, setAdminAuthenticated] = useState(false);
   const [adminPassword, setAdminPassword] = useState("");
@@ -205,7 +204,7 @@ export default function AdminPage() {
     if (!confirm("Voulez-vous vraiment supprimer ce partenaire ?")) return;
     try {
       const token = sessionStorage.getItem("admin_token");
-      const res = await fetch(`${API.partners.list}/${id}`, {
+      const res = await fetch(API.partners.delete(id), {
         method: "DELETE",
         headers: token ? { Authorization: `Bearer ${token}` } : {},
       });
@@ -251,7 +250,7 @@ export default function AdminPage() {
     if (!confirm("Voulez-vous vraiment supprimer cet appel à projets ?")) return;
     try {
       const token = sessionStorage.getItem("admin_token");
-      const res = await fetch(`${API.partners.programs}/${id}`, {
+      const res = await fetch(API.partners.programDelete(id), {
         method: "DELETE",
         headers: token ? { Authorization: `Bearer ${token}` } : {},
       });

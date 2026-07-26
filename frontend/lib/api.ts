@@ -35,13 +35,16 @@ export const API = {
   },
   partners: {
     list: `${API_BASE}/api/v1/partners`,
+    delete: (id: string) => `${API_BASE}/api/v1/partners/${id}`,
     programs: `${API_BASE}/api/v1/programs`,
+    programDelete: (id: string) => `${API_BASE}/api/v1/programs/${id}`,
     resources: `${API_BASE}/api/v1/resources`,
   },
   auth: {
     login: `${API_BASE}/api/v1/auth/login`,
   },
   admin: {
+    login: `${API_BASE}/api/v1/admin/login`,
     investors: `${API_BASE}/api/v1/admin/investors`,
     startups: `${API_BASE}/api/v1/admin/startups`,
   },
