@@ -1,19 +1,23 @@
+import json
 import uuid
 from datetime import datetime
 from typing import List, Optional
-from fastapi import APIRouter, Depends, Query, File, UploadFile
+
+from fastapi import APIRouter, Depends, File, Query, UploadFile
 from app.core.config import settings
 from pydantic import BaseModel, Field
+from sqlmodel import col, func, or_, select
 from sqlmodel.ext.asyncio.session import AsyncSession
+
 from app.core.database import get_session
-from app.entities.startup import Startup
+from app.core.redis import redis_client
 from app.entities.lead import Lead
-from app.repositories.startup_repository import PostgresStartupRepository
-from app.repositories.lead_repository import PostgresLeadRepository
+from app.entities.startup import Startup
 from app.repositories.cache_repository import CacheRepository
-from app.use_cases.get_startups import GetStartupsUseCase
-from app.use_cases.get_startup_by_slug import GetStartupBySlugUseCase
+from app.repositories.lead_repository import PostgresLeadRepository
+from app.repositories.startup_repository import PostgresStartupRepository
 from app.use_cases.create_lead import CreateLeadUseCase
+from app.use_cases.get_startup_by_slug import GetStartupBySlugUseCase
 
 router = APIRouter(prefix="/startups", tags=["Startups"])
 
@@ -133,7 +137,8 @@ async def list_startups(
     limit: int = Query(default=9, ge=1, le=100),
     search: Optional[str] = Query(default=None),
     sector: Optional[List[str]] = Query(default=None),
-    size: Optional[List[str]] = Query(default=None),
+    min_employees: Optional[int] = Query(default=None),
+    max_employees: Optional[int] = Query(default=None),
     seeking: Optional[List[str]] = Query(default=None),
     session: AsyncSession = Depends(get_session),
 ):
@@ -142,26 +147,88 @@ async def list_startups(
     Includes Redis caching layer for queries without filters.
     """
     offset = (page - 1) * limit
-    
-    # Initialize repository and use case
-    db_repo = PostgresStartupRepository(session)
-    cache_repo = CacheRepository()
-    use_case = GetStartupsUseCase(db_repo, cache_repo)
-    
-    # Execute use case
-    startups, total = await use_case.execute(
-        limit=limit,
-        offset=offset,
-        search=search,
-        sectors=sector,
-        employee_size_ranges=size,
-        seeking_needs=seeking,
+
+    has_filters = (
+        search is not None
+        or (sector is not None and len(sector) > 0)
+        or min_employees is not None
+        or max_employees is not None
+        or (seeking is not None and len(seeking) > 0)
     )
-    
+
+    if not has_filters:
+        cache_key = f"startups:default:page_{page}:limit_{limit}"
+
+        if redis_client.client:
+            try:
+                cached_data = await redis_client.client.get(cache_key)
+                if cached_data:
+                    parsed = json.loads(cached_data)
+                    return StartupPaginatedResponse(**parsed)
+            except Exception as e:
+                print(f"Redis cache fetch error: {e}")
+
+        items_query = select(Startup).order_by(col(Startup.created_at).desc()).offset(offset).limit(limit)
+        items_res = await session.execute(items_query)
+        items = list(items_res.scalars().all())
+
+        count_query = select(func.count()).select_from(Startup)
+        count_res = await session.execute(count_query)
+        total = count_res.scalar_one_or_none() or 0
+
+        total_pages = (total + limit - 1) // limit if total > 0 else 1
+
+        response_data = StartupPaginatedResponse(
+            items=[StartupRead.from_orm(item) for item in items],
+            total=total,
+            page=page,
+            limit=limit,
+            total_pages=total_pages,
+        )
+
+        if redis_client.client:
+            try:
+                await redis_client.client.set(cache_key, response_data.json(), ex=600)
+            except Exception as e:
+                print(f"Redis cache save error: {e}")
+
+        return response_data
+
+    query = select(Startup)
+
+    if search:
+        search_pattern = f"%{search}%"
+        query = query.where(
+            or_(
+                col(Startup.name).ilike(search_pattern),
+                col(Startup.description).ilike(search_pattern),
+            )
+        )
+
+    if sector:
+        query = query.where(col(Startup.sector).in_(sector))
+
+    if min_employees is not None:
+        query = query.where(col(Startup.employee_count) >= min_employees)
+    if max_employees is not None:
+        query = query.where(col(Startup.employee_count) <= max_employees)
+
+    if seeking:
+        for need in seeking:
+            query = query.where(col(Startup.seeking).contains(need))
+
+    count_query = select(func.count()).select_from(query.subquery())
+    count_res = await session.execute(count_query)
+    total = count_res.scalar_one_or_none() or 0
+
+    paginated_query = query.order_by(col(Startup.created_at).desc()).offset(offset).limit(limit)
+    items_res = await session.execute(paginated_query)
+    items = list(items_res.scalars().all())
+
     total_pages = (total + limit - 1) // limit if total > 0 else 1
-    
+
     return StartupPaginatedResponse(
-        items=startups,
+        items=[StartupRead.from_orm(item) for item in items],
         total=total,
         page=page,
         limit=limit,

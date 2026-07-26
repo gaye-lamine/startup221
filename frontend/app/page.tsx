@@ -168,6 +168,9 @@ export default function DirectoryPage() {
     setPage(1);
   };
 
+  // Toggle filters state for mobile devices
+  const [showFiltersMobile, setShowFiltersMobile] = useState(false);
+
   return (
     <div className="pb-20 bg-slate-50/50 min-h-screen">
       {/* ─── HERO SECTION ────────────────────────────────────────────── */}
@@ -221,6 +224,53 @@ export default function DirectoryPage() {
                 {tag}
               </button>
             ))}
+          </div>
+
+          {/* Ecosystem Quick Access Pillars */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-8 pt-8 border-t border-slate-200/60 max-w-3xl mx-auto">
+            <Link
+              href="/investors"
+              className="bg-white border border-slate-200/80 hover:border-brand-active hover:shadow-md p-3.5 rounded-2xl transition-all text-center group"
+            >
+              <span className="text-lg mb-1 block">💼</span>
+              <span className="text-xs font-extrabold text-slate-900 group-hover:text-brand-active block">
+                Investisseurs
+              </span>
+              <span className="text-[10px] text-slate-400 font-medium">Fonds & Angels</span>
+            </Link>
+
+            <Link
+              href="/partners"
+              className="bg-white border border-slate-200/80 hover:border-emerald-500 hover:shadow-md p-3.5 rounded-2xl transition-all text-center group"
+            >
+              <span className="text-lg mb-1 block">🏛️</span>
+              <span className="text-xs font-extrabold text-slate-900 group-hover:text-emerald-700 block">
+                Incubateurs
+              </span>
+              <span className="text-[10px] text-slate-400 font-medium">DER, CTIC...</span>
+            </Link>
+
+            <Link
+              href="/opportunities"
+              className="bg-white border border-slate-200/80 hover:border-amber-500 hover:shadow-md p-3.5 rounded-2xl transition-all text-center group"
+            >
+              <span className="text-lg mb-1 block">✨</span>
+              <span className="text-xs font-extrabold text-slate-900 group-hover:text-amber-600 block">
+                Appels à Projets
+              </span>
+              <span className="text-[10px] text-slate-400 font-medium">Concours & FAIN</span>
+            </Link>
+
+            <Link
+              href="/resources"
+              className="bg-white border border-slate-200/80 hover:border-blue-500 hover:shadow-md p-3.5 rounded-2xl transition-all text-center group"
+            >
+              <span className="text-lg mb-1 block">📚</span>
+              <span className="text-xs font-extrabold text-slate-900 group-hover:text-blue-600 block">
+                Ressources
+              </span>
+              <span className="text-[10px] text-slate-400 font-medium">Startup Act & Deck</span>
+            </Link>
           </div>
 
           {/* Contextual Banner — Logged-in Founder */}
@@ -283,10 +333,29 @@ export default function DirectoryPage() {
 
       {/* ─── DUAL COLUMN INTERFACE ──────────────────────────────────── */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        
+        {/* Mobile Filters Toggle Button */}
+        <div className="lg:hidden mb-4 w-full">
+          <button
+            onClick={() => setShowFiltersMobile(!showFiltersMobile)}
+            className="w-full bg-white border border-slate-200 text-slate-700 font-bold text-xs py-3 px-4 rounded-xl flex items-center justify-between shadow-sm"
+          >
+            <span className="flex items-center gap-2">
+              <span>🔍</span>
+              <span>Filtres de recherche et de tri</span>
+            </span>
+            <span className="text-brand-active font-semibold">
+              {showFiltersMobile ? "Masquer ▲" : "Afficher ▼"}
+            </span>
+          </button>
+        </div>
+
         <div className="flex flex-col lg:flex-row gap-8 items-start">
           
           {/* Left Column: Sidebar Filters */}
-          <aside className="w-full lg:w-64 shrink-0 bg-white border border-slate-100 rounded-2xl p-6 shadow-sm space-y-8">
+          <aside className={`w-full lg:w-64 shrink-0 bg-white border border-slate-100 rounded-2xl p-6 shadow-sm space-y-8 ${
+            showFiltersMobile ? "block" : "hidden lg:block"
+          }`}>
             <div className="flex justify-between items-center pb-4 border-b border-slate-100">
               <h2 className="font-bold text-slate-900 text-base">Filtres</h2>
               {(selectedSectors.length > 0 || selectedNeeds.length > 0 || selectedSizes.length > 0 || searchSubmitted) && (
