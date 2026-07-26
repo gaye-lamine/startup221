@@ -7,8 +7,7 @@ services:
       dockerfile: Dockerfile
     container_name: startup221_backend
     restart: always
+    env_file:
+      - ./backend/.env
     ports:
       - "8088:8000"
-    environment:
-      - APP_NAME=StartupSN API
-      - ENVIRONMENT=production
