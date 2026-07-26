@@ -62,7 +62,7 @@ export default function PartnersDirectoryPage() {
           </p>
 
           {/* Filter Pills */}
-          <div className="flex flex-wrap items-center justify-center gap-2 pt-6">
+          <div className="flex items-center justify-start md:justify-center gap-2 pt-6 overflow-x-auto whitespace-nowrap pb-3 px-2 max-w-full no-scrollbar">
             {[
               { id: "all", label: "Tous les partenaires" },
               { id: "Incubateur", label: "Incubateurs" },
@@ -73,7 +73,7 @@ export default function PartnersDirectoryPage() {
               <button
                 key={f.id}
                 onClick={() => setFilterType(f.id)}
-                className={`text-xs font-bold px-4 py-2 rounded-xl transition-all border ${
+                className={`text-xs font-bold px-4 py-2 rounded-xl transition-all border shrink-0 ${
                   filterType === f.id
                     ? "bg-emerald-700 text-white border-emerald-700 shadow-sm"
                     : "bg-white text-slate-600 border-slate-200 hover:border-slate-300"

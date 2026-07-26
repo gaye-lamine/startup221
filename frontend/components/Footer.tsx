@@ -7,56 +7,71 @@ export default function Footer() {
   return (
     <footer className="bg-brand-dark border-t border-slate-800 py-16 mt-20 text-[#F7F3E8]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-12">
           {/* Brand Info */}
-          <div className="space-y-4">
+          <div className="space-y-4 md:col-span-2">
             <div className="flex items-center gap-2">
               <img src="/logo-fond-sombre.svg" alt="StartupSN Logo" className="h-8 w-auto" />
             </div>
-            <p className="text-sm text-slate-400 max-w-xs leading-relaxed font-medium">
+            <p className="text-sm text-slate-400 max-w-sm leading-relaxed font-medium">
               Propulser l&apos;écosystème technologique sénégalais vers de nouveaux sommets. Startups, investisseurs et partenaires : tout l&apos;écosystème, au même endroit.
             </p>
           </div>
 
-          {/* Navigation */}
+          {/* Navigation Piliers */}
           <div>
             <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4">
-              Navigation
+              L&apos;Écosystème
             </h3>
-            <ul className="space-y-3 font-medium">
+            <ul className="space-y-2.5 font-medium">
               <li>
                 <Link href="/" className="text-sm text-slate-300 hover:text-white transition-colors">
-                  Annuaire
+                  Répertoire Startups
                 </Link>
               </li>
               <li>
-                <Link href="/about" className="text-sm text-slate-300 hover:text-white transition-colors">
-                  À propos
+                <Link href="/investors" className="text-sm text-slate-300 hover:text-white transition-colors">
+                  Fonds & Investisseurs
                 </Link>
               </li>
               <li>
-                <Link href="/for-investors" className="text-sm text-slate-300 hover:text-white transition-colors">
-                  Investisseurs
+                <Link href="/partners" className="text-sm text-slate-300 hover:text-white transition-colors">
+                  Incubateurs & Partenaires
+                </Link>
+              </li>
+              <li>
+                <Link href="/opportunities" className="text-sm text-slate-300 hover:text-white transition-colors">
+                  Appels à Projets
+                </Link>
+              </li>
+              <li>
+                <Link href="/resources" className="text-sm text-slate-300 hover:text-white transition-colors">
+                  Ressources & Startup Act
                 </Link>
               </li>
             </ul>
           </div>
 
-          {/* Support */}
+          {/* Plateforme */}
           <div>
             <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4">
-              Support
+              Plateforme
             </h3>
-            <ul className="space-y-3 font-medium">
+            <ul className="space-y-2.5 font-medium">
               <li>
-                <span className="text-sm text-slate-500 cursor-default select-none">
-                  Politique de confidentialité (bientôt)
-                </span>
+                <Link href="/about" className="text-sm text-slate-300 hover:text-white transition-colors">
+                  À propos de StartupSN
+                </Link>
               </li>
               <li>
-                <span className="text-sm text-slate-500 cursor-default select-none">
-                  Contact (bientôt)
-                </span>
+                <Link href="/register" className="text-sm text-slate-300 hover:text-white transition-colors">
+                  Inscrire ma Startup
+                </Link>
+              </li>
+              <li>
+                <Link href="/admin" className="text-sm text-amber-400 hover:underline transition-colors font-bold">
+                  Espace Administration
+                </Link>
               </li>
             </ul>
           </div>

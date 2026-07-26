@@ -65,7 +65,7 @@ export default function InvestorsDirectoryPage() {
           </p>
 
           {/* Filter Pills */}
-          <div className="flex flex-wrap items-center justify-center gap-2 pt-6">
+          <div className="flex items-center justify-start md:justify-center gap-2 pt-6 overflow-x-auto whitespace-nowrap pb-3 px-2 max-w-full no-scrollbar">
             {[
               { id: "all", label: "Tous les investisseurs" },
               { id: "VC / Fonds", label: "Fonds de VC" },
@@ -75,7 +75,7 @@ export default function InvestorsDirectoryPage() {
               <button
                 key={f.id}
                 onClick={() => setFilterType(f.id)}
-                className={`text-xs font-bold px-4 py-2 rounded-xl transition-all border ${
+                className={`text-xs font-bold px-4 py-2 rounded-xl transition-all border shrink-0 ${
                   filterType === f.id
                     ? "bg-brand-active text-white border-brand-active shadow-sm"
                     : "bg-white text-slate-600 border-slate-200 hover:border-slate-300"

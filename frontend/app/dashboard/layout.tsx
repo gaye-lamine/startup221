@@ -55,6 +55,7 @@ export default function DashboardLayout({
   const [startupName, setStartupName] = useState("Ma Startup");
   const [initials, setInitials] = useState("ST");
   const [unrepliedCount, setUnrepliedCount] = useState<number>(0);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   useEffect(() => {
     const storedName = localStorage.getItem("startup_name");
@@ -80,21 +81,53 @@ export default function DashboardLayout({
         })
         .catch(() => setUnrepliedCount(0));
     }
-  }, []);
+  }, [pathname]);
 
   return (
-    <div className="min-h-screen bg-[#F7F3E8] flex">
-      {/* ─── Fixed Sidebar ─────────────────────────────────────────── */}
-      <aside className="w-[240px] shrink-0 bg-white border-r border-slate-200 flex flex-col fixed top-0 left-0 h-full z-40 shadow-[2px_0_16px_rgba(0,0,0,0.02)]">
-        {/* Brand */}
-        <div className="px-6 pt-6 pb-6 border-b border-slate-100">
+    <div className="min-h-screen bg-[#F7F3E8] flex flex-col md:flex-row">
+      {/* ─── Mobile Header Toggle ────────────────────────────────────── */}
+      <div className="md:hidden bg-white border-b border-slate-200 px-4 py-3 flex items-center justify-between sticky top-0 z-50">
+        <Link href="/" className="flex items-center gap-2">
+          <img src="/logo-principal.svg" alt="StartupSN Logo" className="h-6 w-auto" />
+        </Link>
+        <button
+          onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+          className="p-2 text-slate-600 hover:text-slate-800 bg-slate-50 border border-slate-100 rounded-xl"
+          aria-label="Toggle Sidebar"
+        >
+          {isSidebarOpen ? (
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          ) : (
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+          )}
+        </button>
+      </div>
+
+      {/* ─── Sidebar Overlay on Mobile ──────────────────────────────── */}
+      {isSidebarOpen && (
+        <div
+          onClick={() => setIsSidebarOpen(false)}
+          className="fixed inset-0 bg-slate-900/30 backdrop-blur-sm z-30 md:hidden"
+        />
+      )}
+
+      {/* ─── Sidebar ───────────────────────────────────────────────── */}
+      <aside className={`w-[240px] shrink-0 bg-white border-r border-slate-200 flex flex-col fixed top-16 md:top-0 left-0 h-[calc(100vh-64px)] md:h-screen z-40 shadow-[2px_0_16px_rgba(0,0,0,0.02)] transition-transform duration-300 md:translate-x-0 ${
+        isSidebarOpen ? "translate-x-0" : "-translate-x-full"
+      }`}>
+        {/* Brand - Desktop Only */}
+        <div className="hidden md:block px-6 pt-6 pb-6 border-b border-slate-100">
           <Link href="/" className="flex items-center gap-2">
             <img src="/logo-principal.svg" alt="StartupSN Logo" className="h-6 w-auto" />
           </Link>
         </div>
 
         {/* Nav */}
-        <nav className="flex flex-col gap-1 px-4 py-6 flex-grow">
+        <nav className="flex flex-col gap-1 px-4 py-6 flex-grow overflow-y-auto">
           {NAV_ITEMS.map(({ label, href, isMessages, icon }) => {
             const isActive = pathname === href;
             const showBadge = isMessages && unrepliedCount > 0;
@@ -102,6 +135,7 @@ export default function DashboardLayout({
               <Link
                 key={label}
                 href={href}
+                onClick={() => setIsSidebarOpen(false)}
                 className={`flex items-center justify-between gap-3 px-3.5 py-3 rounded-xl text-sm font-semibold transition-all ${
                   isActive
                     ? "bg-brand-active text-white shadow-md shadow-brand-active/10"
@@ -153,7 +187,9 @@ export default function DashboardLayout({
       </aside>
 
       {/* ─── Main content ──────────────────────────────────────────── */}
-      <main className="flex-grow ml-[240px] min-h-screen">{children}</main>
+      <main className="flex-grow md:ml-[240px] min-h-[calc(100vh-64px)] md:min-h-screen p-4 sm:p-8">
+        {children}
+      </main>
     </div>
   );
 }
